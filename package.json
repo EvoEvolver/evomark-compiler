@@ -1,0 +1,10 @@
+{
+  "main": "index.js",
+  "devDependencies": {
+    "@types/node": "^18.15.11",
+    "typescript": "^5.0.3"
+  },
+  "dependencies": {
+    "relaxed-json": "^1.0.3"
+  }
+}
