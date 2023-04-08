@@ -1,4 +1,5 @@
 import { parse_node } from "./parse"
+import { escapeHtml } from "./utils/html"
 
 
 type func_tokenizer = (root: parse_node, tokens: token[], renderer: evomark_tokenizer) => void
@@ -6,9 +7,11 @@ type func_tokenizer = (root: parse_node, tokens: token[], renderer: evomark_toke
 var special_node_types = ["text", "func"]
 
 export class evomark_tokenizer {
+    public config = {}
+    
     public tokenize_rules_func: Record<string, tokeniz_rule_func>
 
-    public constructor(){
+    public constructor() {
         this.tokenize_rules_func = {}
         this.add_func_rule(new tokeniz_rule_func("box", tokenize_box))
     }
@@ -17,10 +20,6 @@ export class evomark_tokenizer {
         if (rule.name in this.tokenize_rules_func)
             throw Error("Trying to add a rule of the same name")
         this.tokenize_rules_func[rule.name] = rule
-    }
-
-    public tokenize_inline: func_tokenizer = (root: parse_node, tokens: token[]) => {
-
     }
 
     public tokenize_core(root: parse_node, tokens: token[]) {
@@ -62,7 +61,7 @@ export class token {
         this.type = type
         this.content = content
     }
-    public print(): string {
+    public write(): string {
         return [this.type, ":", this.content].join("")
     }
 }
@@ -72,26 +71,42 @@ export class token {
 type html_attr = Record<string, string>
 export class tag_token extends token {
     private tag_type = -1
-    public attrs: html_attr[]
-    public constructor(tag: string, tag_type: number, attrs: html_attr[]) {
+    public attrs: html_attr
+    public constructor(tag: string, tag_type: number, attrs: html_attr) {
         super("tag", tag)
         this.attrs = attrs
         this.tag_type = tag_type
     }
-    public print(): string {
-        return ["<", this.tag_type != 1 ? "" : "/", this.content, this.tag_type != 2 ? "" : "/", ">"].join("")
+    public write(): string {
+        return ["<", this.tag_type != 1 ? "" : "/", this.content, write_attr(this.attrs), this.tag_type != 2 ? "" : "/", ">"].join("")
     }
 }
 
-export function get_open_tag(tag: string){
+
+function write_attr(attrs: html_attr) {
+    if (!attrs) return ""
+    let res = []
+    let keys = Object.keys(attrs)
+    let values = Object.values(attrs)
+    for (let i = 0; i < keys.length; i++) {
+        res.push(" ")
+        res.push(keys[i])
+        res.push("=\"")
+        res.push(escapeHtml(values[i]))
+        res.push("\"")
+    }
+    return res.join("")
+}
+
+export function get_open_tag(tag: string) {
     return new tag_token(tag, 0, null)
 }
 
-export function get_close_tag(tag: string){
+export function get_close_tag(tag: string) {
     return new tag_token(tag, 1, null)
 }
 
-export function get_closed_tag(tag: string){
+export function get_closed_tag(tag: string) {
     return new tag_token(tag, 2, null)
 }
 
@@ -105,13 +120,13 @@ export class tokeniz_rule_func {
     }
 }
 
-function tokenize_box(root: parse_node, tokens: token[], renderer: evomark_tokenizer){
-    for(let child of root.children){
-        if(child.type == "func_body"){
+function tokenize_box(root: parse_node, tokens: token[], renderer: evomark_tokenizer) {
+    for (let child of root.children) {
+        if (child.type == "func_body") {
             tokens.push(get_open_tag("div"))
             renderer.tokenize_core(child, tokens)
             tokens.push(get_close_tag("div"))
         }
     }
-    
+
 }

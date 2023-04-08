@@ -6,6 +6,8 @@ export class evomark_parser {
 
     public parse_rules_func: Record<string, parse_rule_func>
 
+    public init_state_config = {}
+
     public constructor() {
         this.parse_rules_func = {}
         this.add_func_rule(new parse_rule_func("box", parse_box))
@@ -110,12 +112,14 @@ export class evomark_parser {
 
     public parse(src: string): parse_node {
         let state = new parse_state(src)
+        state.config = this.init_state_config
         this.parse_core(src, state)
         return state.root_node
     }
 }
 
 export class parse_state {
+    public config = {}
     public pos = 0
     public start = 0
     public end = -1
@@ -129,6 +133,12 @@ export class parse_state {
     public push_node(type: string): parse_node {
         let node = new parse_node(type)
         this.curr_node.children.push(node)
+        node.parent = this.curr_node
+        return node
+    }
+    public push_warning_node(message: string): parse_node {
+        let node = this.push_node("warning")
+        node.content = message
         return node
     }
     public push_error_node(content: string): parse_node {
@@ -154,6 +164,12 @@ export class parse_state {
         this.end = save_state[2]
         this.curr_node = save_state[3]
     }
+    public slice_range(src: string): string{
+        return src.slice(this.start, this.end)
+    }
+    public slice_remaining(src: string): string{
+        return src.slice(this.pos, this.end)
+    }
 }
 
 export class parse_node {
@@ -167,22 +183,22 @@ export class parse_node {
     public constructor(type: string) {
         this.type = type
     }
-    public print: () => string = () => {
+    public write: () => string = () => {
         return (this.type + " " + this.content).replaceAll("\n", "\\n")
     }
-    private print_tree_with_level(level: number): string {
+    private write_tree_with_level(level: number): string {
         let indent = " ".repeat(2 * level)
         let res = []
         res.push(indent)
-        res.push(this.print())
+        res.push(this.write())
         res.push("\n")
         for (let child of this.children) {
-            res.push(child.print_tree_with_level(level + 1))
+            res.push(child.write_tree_with_level(level + 1))
         }
         return res.join("")
     }
-    public print_tree(): string {
-        return this.print_tree_with_level(0)
+    public write_tree(): string {
+        return this.write_tree_with_level(0)
     }
 }
 

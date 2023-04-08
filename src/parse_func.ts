@@ -1,5 +1,5 @@
 import { parse_node, parse_state } from "./parse"
-import { find_next_pairing_ignore_quote } from "./utils/index"
+import { find_next_pairing_ignore_quote } from "./utils/parse"
 import { parse } from "relaxed-json"
 
 
@@ -19,7 +19,10 @@ export function parse_func_param(src: string, state: parse_state): any {
     node.content = param_src
 
     // Judge the type of the input
-    if("\"\'".indexOf(param_src[0])>-1 || param_src.indexOf(":")<0){
+    if(param_src.length==0){
+        node.content_obj = null
+    }
+    else if("\"\'".indexOf(param_src[0])>-1 || param_src.indexOf(":")<0){
         node.content_obj = parse([param_src].join(""))
     }
     else{

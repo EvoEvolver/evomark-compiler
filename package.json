@@ -2,9 +2,11 @@
   "main": "index.js",
   "devDependencies": {
     "@types/node": "^18.15.11",
+    "@types/relaxed-json": "^1.0.1",
     "typescript": "^5.0.3"
   },
   "dependencies": {
-    "relaxed-json": "^1.0.3"
+    "relaxed-json": "^1.0.3",
+    "toml": "^3.0.0"
   }
 }

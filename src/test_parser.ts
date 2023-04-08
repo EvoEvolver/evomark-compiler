@@ -1,16 +1,9 @@
 import { evomark_parser } from "./parse"
 import { evomark_tokenizer } from "./tokenize"
 import * as fs from 'fs'
-
-
+import { evomark_core } from "./core"
+import { make_default_core } from "./default"
 let parser = new evomark_parser()
-let s: string  = fs.readFileSync("../test/example.em", {encoding:'utf8'})
-let root = parser.parse(s)
-console.log(root.print_tree())
-
-let tokenizer = new evomark_tokenizer()
-let tokens = tokenizer.tokenize(root)
-
-for(let token of tokens){
-    console.log(token.print())
-}
+let src: string  = fs.readFileSync("../test/example.em", {encoding:'utf8'})
+let core = make_default_core()
+core.process(src)

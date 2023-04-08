@@ -1,8 +1,4 @@
 
-export function is_letter(){
-    
-}
-
 export function find_next_pairing_ignore_quote(open:string, close:string, src:string, start:number){
     let curr_quote = -1
     let nest = 1
