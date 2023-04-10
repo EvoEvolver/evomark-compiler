@@ -9,3 +9,5 @@
 #box{
     Hello
 }
+
+#ref{@foo}

@@ -1,12 +1,16 @@
 
 
-import { parse_func_body, parse_func_param, parse_func_name, valid_func_name_char } from "./parse_func"
+import { parse_func_body, parse_func_param } from "./parse_func"
+import { parse_ref } from "./parse_ref"
+
 
 export class evomark_parser {
 
     public parse_rules_func: Record<string, parse_rule_func>
 
-    public init_state_config = {}
+    public init_state_config = ()=>{
+        return {}
+    }
 
     public constructor() {
         this.parse_rules_func = {}
@@ -26,12 +30,12 @@ export class evomark_parser {
             return false
         }
 
-        if (src[start] != "#" || !valid_func_name_char.test(src[start + 1])) {
+        if (src[start] != "#" || !valid_identifier_name_char.test(src[start + 1])) {
             return false
         }
 
         state.pos++
-        let func_name = parse_func_name(src, state)
+        let func_name = parse_identifier(src, state)
 
         // TODO look up func_name table
         let rule = this.parse_rules_func[func_name]
@@ -118,12 +122,10 @@ export class evomark_parser {
 
     }
 
-    public parse_ref(src: string, state: parse_state): boolean {
-        let start = state.pos
-        if (src[start] != "@")
+    public parse_ref_assign(src: string, state: parse_state): boolean {
+        let ref_name = parse_ref(src, state)
+        if(!ref_name)
             return false
-        state.pos++
-        let ref_name = parse_func_name(src, state)
         let i = state.pos
         let found_equal = false
         for (; i < state.end; i++) {
@@ -164,7 +166,7 @@ export class evomark_parser {
                     state.push_warning_node_to_root("\"@" + ref_name + " = \" must be followed with a function")
                 }
                 else {
-
+                    state.ref_table[ref_name] = ref_node.children[0]
                 }
                 state.curr_node = ref_node.parent
             }
@@ -191,7 +193,7 @@ export class evomark_parser {
                 continue
             if (this.parse_func(src, state))
                 continue
-            if (this.parse_ref(src, state))
+            if (this.parse_ref_assign(src, state))
                 continue
             console.log("There is no available rules. Abort.")
             return false
@@ -199,16 +201,37 @@ export class evomark_parser {
         return true
     }
 
-    public parse(src: string): parse_node {
+    public parse(src: string): [parse_node, parse_state] {
         let state = new parse_state(src)
-        state.config = this.init_state_config
+        state.config = this.init_state_config()
         this.parse_core(src, state)
-        return state.root_node
+        return [state.root_node, state]
     }
+}
+
+
+export var valid_identifier_name_char = /[a-zA-Z0-9._]/
+
+export function is_valid_identifier(src: string): boolean{
+    return /^[a-zA-Z0-9._]+$/.test(src)
+}
+
+export function parse_identifier(src: string, state: parse_state): string {
+    let start = state.pos
+    let i = start
+    for (; i < state.end; i++) {
+        if (!valid_identifier_name_char.test(src[i])) {
+            break
+        }
+    }
+    let identifier_name = src.slice(start, i)
+    state.pos = i
+    return identifier_name
 }
 
 export class parse_state {
     public config = {}
+    public ref_table: Record<string, parse_node> = {}
     public pos = 0
     public start = 0
     public end = -1
@@ -230,12 +253,6 @@ export class parse_state {
     public push_warning_node_to_root(message: string): parse_node {
         let node = this.root_node.push_child("warning")
         node.content = message
-        return node
-    }
-    public push_error_node(content: string): parse_node {
-        let node = new parse_node("error")
-        this.curr_node.children.push(node)
-        node.content = content
         return node
     }
     public pop_node() {
@@ -271,6 +288,7 @@ export class parse_node {
     public type: string
     public content: string = ""
     public content_obj: any = null
+    public state: any = null
     public constructor(type: string) {
         this.type = type
     }
@@ -293,6 +311,10 @@ export class parse_node {
     }
     public push_child(type: string): parse_node {
         let node = new parse_node(type)
+        this.add_child(node)
+        return node
+    }
+    public add_child(node: parse_node): parse_node {
         this.children.push(node)
         node.parent = this
         return node

@@ -1,29 +1,30 @@
-import { parse_node } from "./parse"
+import { parse_node, parse_state } from "./parse"
 import { escapeHtml } from "./utils/html"
 
 
-type func_tokenizer = (root: parse_node, tokens: token[], tokener: evomark_tokenizer) => void
+type func_tokenizer = (root: parse_node, tokens: token[], tokener: evomark_tokenizer, state: tokener_state) => void
 
 
 export class evomark_tokenizer {
-    public config = {}
 
-    public state = {}
+    public init_state_config = ()=>{
+        return {}
+    }
 
-    public tokenize_rules_func: Record<string, tokeniz_rule_func>
+    public tokenize_rules_func: Record<string, tokenize_rule_func>
 
     public constructor() {
         this.tokenize_rules_func = {}
-        this.add_func_rule(new tokeniz_rule_func("box", tokenize_box))
+        this.add_func_rule(new tokenize_rule_func("box", tokenize_box))
     }
 
-    public add_func_rule(rule: tokeniz_rule_func) {
+    public add_func_rule(rule: tokenize_rule_func) {
         if (rule.name in this.tokenize_rules_func)
             throw Error("Trying to add a rule of the same name")
         this.tokenize_rules_func[rule.name] = rule
     }
 
-    public tokenize_core(root: parse_node, tokens: token[]) {
+    public tokenize_core(root: parse_node, tokens: token[], state: tokener_state) {
         for (let child of root.children) {
             switch (child.type) {
                 case "text": {
@@ -35,14 +36,17 @@ export class evomark_tokenizer {
                 case "func": {
                     let func_name = child.content
                     let rule = this.tokenize_rules_func[func_name]
-                    if (!rule)
-                        throw Error("No tokenizer for function " + func_name)
-                    rule.tokenize(child, tokens, this)
+                    if (!rule){
+                        //throw Error("No tokenizer for function " + func_name)
+                        rule = this.tokenize_rules_func["box"]
+                        push_warning("No tokenizer for function " + func_name, tokens)
+                    }
+                    rule.tokenize(child, tokens, this, state)
                     break
                 }
                 case "ref":{
                     let ref_name = child.content
-                    this.tokenize_core(child, tokens)
+                    this.tokenize_core(child, tokens, state)
                     break
                 }
                 case "warning": {
@@ -56,14 +60,20 @@ export class evomark_tokenizer {
         }
         return tokens
     }
-
-    public tokenize(root: parse_node): token[] {
+    public tokenize(root: parse_node, parse_state: parse_state): token[] {
         let tokens = []
-        this.tokenize_core(root, tokens)
+        let state = new tokener_state()
+        state
+        this.tokenize_core(root, tokens, state)
         return tokens
     }
 
 
+}
+
+export class tokener_state{
+    public config: any = {}
+    public env: Record<string, boolean> = {}
 }
 
 
@@ -147,7 +157,7 @@ export function get_closed_tag(tag: string) {
 }
 
 
-export class tokeniz_rule_func {
+export class tokenize_rule_func {
     public tokenize: func_tokenizer
     public name: string
     public constructor(name: string, tokenize: func_tokenizer) {
@@ -156,11 +166,11 @@ export class tokeniz_rule_func {
     }
 }
 
-export function tokenize_box(root: parse_node, tokens: token[], tokener: evomark_tokenizer) {
+export function tokenize_box(root: parse_node, tokens: token[], tokener: evomark_tokenizer, state: tokener_state) {
     for (let child of root.children) {
         if (child.type == "func_body") {
             tokens.push(get_open_tag("div"))
-            tokener.tokenize_core(child, tokens)
+            tokener.tokenize_core(child, tokens, state)
             tokens.push(get_close_tag("div"))
         }
     }

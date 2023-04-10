@@ -4,6 +4,7 @@ import { config, make_config_rule } from "./rules/config"
 import { list } from "./rules/list"
 import { figure } from "./rules/figure"
 import { slides } from "./rules/slides"
+import { ref } from "./rules/ref"
 
 export function make_default_core(): evomark_core {
     let core = new evomark_core()
@@ -13,5 +14,6 @@ export function make_default_core(): evomark_core {
     list(core)
     figure(core)
     slides(core)
+    ref(core)
     return core
 }

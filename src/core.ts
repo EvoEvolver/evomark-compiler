@@ -12,9 +12,9 @@ export class evomark_core {
     }
 
     public process(src: string) {
-        let root = this.parser.parse(src)
+        let [root, parse_state] = this.parser.parse(src)
         console.log(root.write_tree())
-        let tokens = this.tokenizer.tokenize(root)
+        let tokens = this.tokenizer.tokenize(root, parse_state)
         let render_res = []
         for (let token of tokens) {
             render_res.push(token.write())

@@ -1,6 +1,6 @@
 import { evomark_core } from "../core"
 import { evomark_parser, parse_node, parse_rule_func, parse_state } from "../parse";
-import { evomark_tokenizer, token, tokeniz_rule_func } from "../tokenize";
+import { evomark_tokenizer, token, tokener_state, tokenize_rule_func } from "../tokenize";
 import { parse_dict } from "../utils/dict";
 
 export function make_config_rule(func_name: string, namespace: string) {
@@ -25,13 +25,13 @@ export function make_config_rule(func_name: string, namespace: string) {
         return true
     }
 
-    function tokenize(root: parse_node, tokens: token[], tokener: evomark_tokenizer) {
+    function tokenize(root: parse_node, tokens: token[], tokener: evomark_tokenizer, state: tokener_state) {
 
     }
     function config(core: evomark_core) {
         core.parser.init_state_config[namespace] = {}
         core.parser.add_func_rule(new parse_rule_func(func_name, parse))
-        core.tokenizer.add_func_rule(new tokeniz_rule_func(func_name, tokenize))
+        core.tokenizer.add_func_rule(new tokenize_rule_func(func_name, tokenize))
     }
     return config
 }

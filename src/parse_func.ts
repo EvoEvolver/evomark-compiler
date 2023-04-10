@@ -3,7 +3,7 @@ import { find_next_pairing_ignore_quote } from "./utils/parse"
 import { parse } from "relaxed-json"
 
 
-export var valid_func_name_char = /[a-zA-Z0-9]/
+
 
 export function parse_func_param(src: string, state: parse_state): any {
     let start = state.pos
@@ -48,17 +48,4 @@ export function parse_func_body(src: string, state: parse_state): parse_node {
     node.content = param_src
     state.pos = next + 1
     return node
-}
-
-export function parse_func_name(src: string, state: parse_state): string {
-    let start = state.pos
-    let i = start
-    for (; i < state.end; i++) {
-        if (!valid_func_name_char.test(src[i])) {
-            break
-        }
-    }
-    let func_name = src.slice(start, i)
-    state.pos = i
-    return func_name
 }
