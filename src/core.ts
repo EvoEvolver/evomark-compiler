@@ -15,9 +15,11 @@ export class evomark_core {
         let root = this.parser.parse(src)
         console.log(root.write_tree())
         let tokens = this.tokenizer.tokenize(root)
+        let render_res = []
         for (let token of tokens) {
-            console.log(token.write())
+            render_res.push(token.write())
         }
+        console.log(render_res.join(""))
     }
 }
 

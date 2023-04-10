@@ -7,7 +7,7 @@ function parse(src: string, state: parse_state, param: any, parser: evomark_pars
     return true
 }
 
-function tokenize(root: parse_node, tokens: token[], renderer: evomark_tokenizer){
+function tokenize(root: parse_node, tokens: token[], tokener: evomark_tokenizer){
     
 }
 

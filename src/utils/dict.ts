@@ -16,7 +16,7 @@ export function parse_dict(src: string, lang: string, state: parse_state): any {
                 return toml_parse(src)
             }
             catch (error) {
-                state.push_warning_node("TOML Parsing error on line " + error.line + ", column " + error.column +
+                state.push_warning_node_to_root("TOML Parsing error on line " + error.line + ", column " + error.column +
                 ": " + error.message)
                 return null
             }
@@ -37,14 +37,14 @@ export function load_dict(base_path: string, src_path: string, state: parse_stat
                 case ".toml": lang = "toml"; break;
                 case ".json": lang = "json"; break;
                 default: {
-                    state.push_warning_node("Not supported extension name \"" + extension_name + "\"");
+                    state.push_warning_node_to_root("Not supported extension name \"" + extension_name + "\"");
                     return null
                 }
             }
             let src = readFileSync(resolve(base_path, src_path), 'utf-8')
 
         } catch (error) {
-            state.push_warning_node("Fail to import \"" + src_path + "\". " + error.message);
+            state.push_warning_node_to_root("Fail to import \"" + src_path + "\". " + error.message);
             return null
         }
     }

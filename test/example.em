@@ -1,27 +1,39 @@
-
-#config(lang:toml){
-    author = "Zijian Zhang"
+#author{
+    author = "Zijian"
 }
+
+hello
 
 #config(src:"info.toml")
 
+first_line
+second_line
 
-jjjj fff
-fffff
-
-
-fff
-
+@adsa = 
 #box
-(dasd:asdas)
 {
-    hello
+    #box{
+        #list{
+            adsadasd
+        }{
+            dasddsadas
+        }
+    }
 }
-(hahha)
 {
     dasdasd
 }
 
+#figure(irena.jpg){
+    This is irena.
+}
+
+#figure(){
+
+}
+
+See #ref{@asds} for detail. 
+#cite{dasdas}{dsa}
 
 #equ{
     \ket{\phi}
@@ -29,3 +41,5 @@ fff
 {
     \ket{\phi}
 }
+
+2

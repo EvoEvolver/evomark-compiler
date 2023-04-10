@@ -10,7 +10,7 @@ function parse(src: string, state: parse_state, param: any, parser: evomark_pars
 function tokenize(root: parse_node, tokens: token[], tokener: evomark_tokenizer){
     for (let child of root.children) {
         if (child.type == "func_body") {
-            let token = get_closed_tag("EquInline")
+            let token = get_closed_tag("Equ")
             token.attrs = {"tex": child.content.trim()}
             tokens.push(token)
         }

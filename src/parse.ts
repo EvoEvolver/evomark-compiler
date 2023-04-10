@@ -40,15 +40,38 @@ export class evomark_parser {
             rule = this.parse_rules_func["box"]
         }
 
-        let node = state.push_node("func")
-        node.content = func_name
-        state.curr_node = node
+        let func_node = state.push_node("func")
+        func_node.content = func_name
+        state.curr_node = func_node
 
         while (true) {
             let param = parse_func_param(src, state)
             let body_node = parse_func_body(src, state)
+
             if ((!param) && (!body_node)) {
-                break
+                // Grammar sugar
+                // Handle multi func like `#clk#box{}`
+                // So that users don't write `#clk{#box{}}`
+                if (src[state.pos] == "#") {
+                    let all_param_node = true
+                    for (let child of func_node.children) {
+                        if (child.type != "func_param") {
+                            all_param_node = false
+                            break
+                        }
+                    }
+                    if (!all_param_node)
+                        break
+                    // Try to parse following as func
+                    let body_node = new parse_node("func_body")
+                    state.curr_node = body_node
+                    if (this.parse_func(src, state)) {
+                        func_node.children.push(body_node)
+                    }
+                    state.curr_node = func_node
+                }
+                else
+                    break
             }
             if (body_node) {
                 let [body_start, body_end] = body_node.delim
@@ -69,7 +92,7 @@ export class evomark_parser {
         let i = start
 
         for (; i < state.end; i++) {
-            if ((/[#]/).test(src[i])) {
+            if ((/[#@]/).test(src[i])) {
                 break
             }
             if ((/[\n]/).test(src[i])) {
@@ -83,13 +106,77 @@ export class evomark_parser {
 
         let succ = i != start
         if (succ) {
-            let node = state.push_node("text")
-            node.content = src.slice(start, i)
+            let content = src.slice(start, i).trim()
+            if (content.length != 0) {
+                let node = state.push_node("text")
+                node.content = content
+            }
             state.pos = i
         }
 
         return succ
 
+    }
+
+    public parse_ref(src: string, state: parse_state): boolean {
+        let start = state.pos
+        if (src[start] != "@")
+            return false
+        state.pos++
+        let ref_name = parse_func_name(src, state)
+        let i = state.pos
+        let found_equal = false
+        for (; i < state.end; i++) {
+            if (src[i] == "=") {
+                found_equal = true
+                i++
+                break
+            }
+            else if (src[i] == " ") {
+                continue
+            }
+            else {
+                break
+            }
+        }
+        if (found_equal) {
+            let found_func = false
+            for (; i < state.end; i++) {
+                let a = src[i]
+                if (" \n".indexOf(src[i]) > -1) {
+                    continue
+                }
+                else if (src[i] == "#") {
+                    found_func = true
+                    break
+                }
+                else {
+                    break
+                }
+            }
+            state.pos = i
+            if (found_func) {
+                let ref_node = state.push_node("ref")
+                ref_node.content = ref_name
+                state.curr_node = ref_node
+                let succ = this.parse_func(src, state)
+                if (!succ) {
+                    state.push_warning_node_to_root("\"@" + ref_name + " = \" must be followed with a function")
+                }
+                else {
+
+                }
+                state.curr_node = ref_node.parent
+            }
+            else {
+                state.push_warning_node_to_root("\"@" + ref_name + " = \" must be followed with a function")
+                return true
+            }
+        }
+        else {
+            state.push_warning_node_to_root("\"@" + ref_name + " = \" must be followed with a function")
+        }
+        return true
     }
 
     public parse_core(src: string, state: parse_state): boolean {
@@ -103,6 +190,8 @@ export class evomark_parser {
             if (this.parse_inline(src, state))
                 continue
             if (this.parse_func(src, state))
+                continue
+            if (this.parse_ref(src, state))
                 continue
             console.log("There is no available rules. Abort.")
             return false
@@ -131,13 +220,15 @@ export class parse_state {
         this.root_node = this.curr_node
     }
     public push_node(type: string): parse_node {
-        let node = new parse_node(type)
-        this.curr_node.children.push(node)
-        node.parent = this.curr_node
-        return node
+        return this.curr_node.push_child(type)
     }
     public push_warning_node(message: string): parse_node {
         let node = this.push_node("warning")
+        node.content = message
+        return node
+    }
+    public push_warning_node_to_root(message: string): parse_node {
+        let node = this.root_node.push_child("warning")
         node.content = message
         return node
     }
@@ -164,10 +255,10 @@ export class parse_state {
         this.end = save_state[2]
         this.curr_node = save_state[3]
     }
-    public slice_range(src: string): string{
+    public slice_range(src: string): string {
         return src.slice(this.start, this.end)
     }
-    public slice_remaining(src: string): string{
+    public slice_remaining(src: string): string {
         return src.slice(this.pos, this.end)
     }
 }
@@ -199,6 +290,12 @@ export class parse_node {
     }
     public write_tree(): string {
         return this.write_tree_with_level(0)
+    }
+    public push_child(type: string): parse_node {
+        let node = new parse_node(type)
+        this.children.push(node)
+        node.parent = this
+        return node
     }
 }
 
