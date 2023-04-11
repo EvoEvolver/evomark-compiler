@@ -10,7 +10,7 @@ function parse(src: string, state: parse_state, param: any, parser: evomark_pars
 function tokenize(root: parse_node, tokens: token[], tokener: evomark_tokenizer, state: tokener_state){
     for (let child of root.children) {
         if (child.type == "func_body") {
-            let token = get_closed_tag("EquInline")
+            let token = get_closed_tag("Equ")
             token.attrs = {"tex": child.content.trim()}
             tokens.push(token)
         }
@@ -18,8 +18,7 @@ function tokenize(root: parse_node, tokens: token[], tokener: evomark_tokenizer,
 }
 
 export function equ(core: evomark_core){
-
-    core.parser.add_func_rule(new parse_rule_func("equ", parse))
-    core.tokenizer.add_func_rule(new tokenize_rule_func("equ", tokenize))
-
+    core.add_rule("equ", parse, tokenize, {
+        "Equ": "@/Equ.vue"
+    })
 }

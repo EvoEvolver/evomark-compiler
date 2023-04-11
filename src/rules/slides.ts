@@ -118,7 +118,11 @@ export function slides(core: evomark_core){
     core.tokenizer.add_func_rule(new tokenize_rule_func("clk", tokenize_clk))
     core.parser.add_func_rule(new parse_rule_func("voice", parse_voice))
     core.tokenizer.add_func_rule(new tokenize_rule_func("voice", tokenize_voice))
-
+    
+    core.register_modules("slides", {
+        "SlidesBox": "@/slides/SlidesBox.vue",
+        "Slide": "@/slides/Slide.vue",
+    })
 }
 
 

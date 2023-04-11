@@ -1,3 +1,7 @@
+#config{
+    title = "Hello world"
+}
+
 #author{
     author = "Zijian"
 }

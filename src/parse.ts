@@ -8,7 +8,7 @@ export class evomark_parser {
 
     public parse_rules_func: Record<string, parse_rule_func>
 
-    public init_state_config = ()=>{
+    public init_state_config = () => {
         return {}
     }
 
@@ -94,6 +94,8 @@ export class evomark_parser {
         let start = state.pos
 
         let i = start
+        let change_line_break = false
+        let content: string
 
         for (; i < state.end; i++) {
             if ((/[#@]/).test(src[i])) {
@@ -101,16 +103,17 @@ export class evomark_parser {
             }
             if ((/[\n]/).test(src[i])) {
                 if (i + 1 < state.end && (/[\n]/).test(src[i + 1])) {
-                    i++
+                    change_line_break = true
                     break
                 }
             }
-
         }
+
+
 
         let succ = i != start
         if (succ) {
-            let content = src.slice(start, i).trim()
+            let content = src.slice(start, i)
             if (content.length != 0) {
                 let node = state.push_node("text")
                 node.content = content
@@ -118,13 +121,26 @@ export class evomark_parser {
             state.pos = i
         }
 
+        if (change_line_break) {
+            //let node = state.push_node("tag")
+            //node.content = "br"
+            let j = i + 2
+            for (; j < state.end; j++) {
+                if (!/\s\n/.test[src[j]]) {
+                    break
+                }
+            }
+            state.pos = j
+        }
+
+
         return succ
 
     }
 
     public parse_ref_assign(src: string, state: parse_state): boolean {
         let ref_name = parse_ref(src, state)
-        if(!ref_name)
+        if (!ref_name)
             return false
         let i = state.pos
         let found_equal = false
@@ -166,7 +182,14 @@ export class evomark_parser {
                     state.push_warning_node_to_root("\"@" + ref_name + " = \" must be followed with a function")
                 }
                 else {
-                    state.ref_table[ref_name] = ref_node.children[0]
+                    // Add the ref to the ref_table
+                    if (ref_name in state.ref_table) {
+                        state.push_warning_node("Redefining " + ref_name + "!")
+                    }
+                    else {
+                        state.ref_table[ref_name] = ref_node.children[0]
+                    }
+
                 }
                 state.curr_node = ref_node.parent
             }
@@ -212,7 +235,7 @@ export class evomark_parser {
 
 export var valid_identifier_name_char = /[a-zA-Z0-9._]/
 
-export function is_valid_identifier(src: string): boolean{
+export function is_valid_identifier(src: string): boolean {
     return /^[a-zA-Z0-9._]+$/.test(src)
 }
 
@@ -321,7 +344,7 @@ export class parse_node {
     }
 }
 
-type func_parser = (src: string, state: parse_state, param: any, parser: evomark_parser) => boolean
+export type func_parser = (src: string, state: parse_state, param: any, parser: evomark_parser) => boolean
 
 export class parse_rule_func {
     public parse: func_parser

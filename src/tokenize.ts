@@ -2,10 +2,12 @@ import { parse_node, parse_state } from "./parse"
 import { escapeHtml } from "./utils/html"
 
 
-type func_tokenizer = (root: parse_node, tokens: token[], tokener: evomark_tokenizer, state: tokener_state) => void
+export type func_tokenizer = (root: parse_node, tokens: token[], tokener: evomark_tokenizer, state: tokener_state) => void
 
 
 export class evomark_tokenizer {
+
+    public modules: Record<string, any>
 
     public init_state_config = ()=>{
         return {}
@@ -16,6 +18,11 @@ export class evomark_tokenizer {
     public constructor() {
         this.tokenize_rules_func = {}
         this.add_func_rule(new tokenize_rule_func("box", tokenize_box))
+        this.modules = {
+            ref_def : {
+                Referred: "@/Referred.vue"
+            }
+        }
     }
 
     public add_func_rule(rule: tokenize_rule_func) {
@@ -28,14 +35,15 @@ export class evomark_tokenizer {
         for (let child of root.children) {
             switch (child.type) {
                 case "text": {
-                    tokens.push(get_open_tag("div").set_class("text"))
+                    tokens.push(get_open_tag("span").set_class("text"))
                     tokens.push(new token("text", child.content))
-                    tokens.push(get_close_tag("div"))
+                    tokens.push(get_close_tag("span"))
                     break
                 }
                 case "func": {
                     let func_name = child.content
                     let rule = this.tokenize_rules_func[func_name]
+                    state.used_func[func_name] = ""
                     if (!rule){
                         //throw Error("No tokenizer for function " + func_name)
                         rule = this.tokenize_rules_func["box"]
@@ -46,7 +54,15 @@ export class evomark_tokenizer {
                 }
                 case "ref":{
                     let ref_name = child.content
+                    if(!("ref_def" in state.used_func)){
+                        state.used_func["ref_def"] = ""
+                    }
+                    let [open, close] = get_tag_pair("Referred")
+                    open.attrs["id"] = ref_name
+                    open.attrs["func"] = child.children[0].content
+                    tokens.push(open)
                     this.tokenize_core(child, tokens, state)
+                    tokens.push(close)
                     break
                 }
                 case "warning": {
@@ -60,20 +76,38 @@ export class evomark_tokenizer {
         }
         return tokens
     }
-    public tokenize(root: parse_node, parse_state: parse_state): token[] {
+    public tokenize(root: parse_node, parse_state: parse_state): [token[], tokener_state] {
         let tokens = []
-        let state = new tokener_state()
-        state
+        let state = new tokener_state(parse_state)
         this.tokenize_core(root, tokens, state)
-        return tokens
+        return [tokens, state]
     }
 
+    public get_component_imports(state: tokener_state){
+        let used_func = state.used_func
+        let res = []
+        for(let func_name in used_func){
+            let modules = this.modules[func_name]
+            if(!modules)
+                continue
+            for(let module_name in modules){
+                let module_path = modules[module_name]
+                res.push(`import ${module_name} from "${module_path}"\n`)
+            }
+        }
+        return res.join("")
+    }
 
 }
 
 export class tokener_state{
     public config: any = {}
+    public ref_table: Record<string, parse_node>
+    public used_func: any = {}
     public env: Record<string, boolean> = {}
+    public constructor(parse_state: parse_state){
+        this.ref_table = parse_state.ref_table
+    }
 }
 
 
@@ -103,7 +137,7 @@ export class tag_token extends token {
         this.tag_type = tag_type
     }
     public write(): string {
-        return ["<", this.tag_type != 1 ? "" : "/", this.content, write_attr(this.attrs), this.tag_type != 2 ? "" : "/", ">\n"].join("")
+        return ["<", this.tag_type != 1 ? "" : "/", this.content, write_attr(this.attrs), this.tag_type != 2 ? "" : "/", ">"].join("")
     }
     public set_attr(attrs: html_attr): tag_token{
         this.attrs = attrs
