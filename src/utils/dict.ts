@@ -27,7 +27,7 @@ export function parse_dict(src: string, lang: string, state: parse_state): any {
     }
 }
 
-export function load_dict(base_path: string, src_path: string, state: parse_state): any {
+export function load_dict(input_base: string, src_path: string, state: parse_state): any {
     let src: string
     let lang: string
     if (src_path) {
@@ -41,7 +41,7 @@ export function load_dict(base_path: string, src_path: string, state: parse_stat
                     return null
                 }
             }
-            let src = readFileSync(resolve(base_path, src_path), 'utf-8')
+            let src = readFileSync(resolve(input_base, src_path), 'utf-8')
 
         } catch (error) {
             state.push_warning_node_to_root("Fail to import \"" + src_path + "\". " + error.message);

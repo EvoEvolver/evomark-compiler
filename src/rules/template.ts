@@ -11,9 +11,9 @@ function tokenize(root: parse_node, tokens: token[], tokener: evomark_tokenizer,
     
 }
 
-export function equ_rule(core: evomark_core){
+export function xxx_rule(core: evomark_core){
 
-    core.parser.add_func_rule(new parse_rule_func("equ", parse))
-    core.tokenizer.add_func_rule(new tokenize_rule_func("equ", tokenize))
+    core.parser.add_func_rule(new parse_rule_func("xxx", parse))
+    core.tokenizer.add_func_rule(new tokenize_rule_func("xxx", tokenize))
 
 }

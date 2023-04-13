@@ -27,10 +27,10 @@ function tokenize(root: parse_node, tokens: token[], tokener: evomark_tokenizer,
     }
     let child = root.children[0]
     let ref_name = child.content
-    let [open, close] = get_tag_pair("PreviewLink")
-    open.attrs["id"] = ref_name
-    open.attrs["func"] = child.content
+    let [open, close] = get_tag_pair("Referring")
     let refered = state.ref_table[ref_name]
+    open.attrs[":target"] = `['${ref_name}']`
+    open.attrs["func"] = refered.content
     if (refered) {
         tokens.push(open)
         //tokens.push(new token("text", state.ref_table[child.content].content + "."))
@@ -48,7 +48,7 @@ export function ref(core: evomark_core) {
     core.tokenizer.add_func_rule(new tokenize_rule_func("ref", tokenize))
 
     core.register_modules("ref", {
-        "PreviewLink": "@/PreviewLink.vue"
+        "Referring": "@/Referring.vue"
     })
 
 }

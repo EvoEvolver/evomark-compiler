@@ -1,4 +1,9 @@
-# Hello world!
+#config{
+    title = "Hello World!"
+}
+
+
+#sec{Hello world!} 
 
 @a = 
 #list{
@@ -9,6 +14,23 @@
 
 #ref{@a} is an awesome list!
 
-#equ{
-    E = mc^2
+
+
+#slides{
+    #slide{
+        #clk(1)#box{
+            Hello!
+            #voice{
+                Hello!
+            }
+        }
+        #clk(1)#box{
+            Hello!
+        }
+    }
+    #slide{
+        #equ{
+            E = mc^2
+        }
+    }
 }

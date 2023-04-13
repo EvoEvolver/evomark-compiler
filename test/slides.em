@@ -2,7 +2,13 @@
 
 #slides{
     #slide{
-        #clk(then)#box{
+        #clk(1)#box{
+            Hello!
+            #voice{
+                Hello!
+            }
+        }
+        #clk(1)#box{
             Hello!
         }
     }

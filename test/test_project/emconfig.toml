@@ -1,0 +1,19 @@
+project_title = "Evomark Test Project"
+contents = ["index", "about"]
+chat_url = "https://gitter.im/EvoEvolver/community"
+git_repo_url = "https://github.com/EvoEvolver/evomark-framework/tree/main/docs_src"
+[license]
+title = "Creative Commons Attribution-ShareAlike 4.0 International License"
+link = "https://creativecommons.org/licenses/by-sa/4.0/"
+[affiliation]
+uoft = "Department of Computer Science, University of Toronto, Canada"
+[[author]]
+given_name = "Zi-Jian"
+family_name = "Zhang"
+affiliation = ["uoft"]
+note = "email"
+[author_note]
+email = "zijian.academic@outlook.com"
+[[responsible_author]]
+name = "Zi-Jian Zhang"
+link = "https://github.com/doomspec"

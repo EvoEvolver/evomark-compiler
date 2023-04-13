@@ -65,6 +65,10 @@ export class evomark_tokenizer {
                     tokens.push(close)
                     break
                 }
+                case "sep":{
+                    tokens.push(new tag_token("br", 0, null))
+                    break
+                }
                 case "warning": {
                     push_warning(child.content, tokens)
                     break
@@ -101,12 +105,13 @@ export class evomark_tokenizer {
 }
 
 export class tokener_state{
-    public config: any = {}
+    public config: any = null
     public ref_table: Record<string, parse_node>
     public used_func: any = {}
-    public env: Record<string, boolean> = {}
+    public env: Record<string, any> = {}
     public constructor(parse_state: parse_state){
         this.ref_table = parse_state.ref_table
+        this.config = parse_state.config
     }
 }
 
@@ -137,7 +142,13 @@ export class tag_token extends token {
         this.tag_type = tag_type
     }
     public write(): string {
-        return ["<", this.tag_type != 1 ? "" : "/", this.content, write_attr(this.attrs), this.tag_type != 2 ? "" : "/", ">"].join("")
+        let tag = ["<", this.tag_type != 1 ? "" : "/", this.content, write_attr(this.attrs), this.tag_type != 2 ? "" : "/", ">"].join("")
+        if(["span", "strong"].indexOf(this.content)<0){
+            return tag+"\n"
+        }
+        else{
+            return tag
+        }
     }
     public set_attr(attrs: html_attr): tag_token{
         this.attrs = attrs

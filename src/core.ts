@@ -13,12 +13,12 @@ export class evomark_core {
     }
 
     public add_parse_rule(name: string, parse: func_parser){
-        this.parser.add_func_rule(new parse_rule_func("equ", parse))
+        this.parser.add_func_rule(new parse_rule_func(name, parse))
     
     }
 
     public add_tokenizer_rule(name: string, tokenize: func_tokenizer){
-        this.tokenizer.add_func_rule(new tokenize_rule_func("equ", tokenize))
+        this.tokenizer.add_func_rule(new tokenize_rule_func(name, tokenize))
     }
 
     public register_modules(name: string, modules: any){
@@ -31,22 +31,38 @@ export class evomark_core {
         this.register_modules(name, modules)
     }
 
-    public process(src: string) {
-        let [root, parse_state] = this.parser.parse(src)
+    public process(src: string, emconfig: any): [string, any] {
+        if(!emconfig){
+            emconfig = {}
+        }
+        let [root, parse_state] = this.parser.parse(src, emconfig)
         console.log(root.write_tree())
         let [tokens, tokener_state] = this.tokenizer.tokenize(root, parse_state)
-        let render_res = ["<template>\n"]
+        let render_res = ["<template>\n<Document>\n"]
         for (let token of tokens) {
             render_res.push(token.write())
         }
-        render_res.push("\n</template>\n\n")
+        render_res.push("\n</Document>\n</template>\n\n")
         render_res.push("<script setup>\n")
+        render_res.push('import { provide } from "vue"\n')
+        render_res.push('import emconfig from "@root/emconfig.json"\n')
+        render_res.push('provide("emconfig", emconfig)\n')
+        render_res.push('import emctx from "@root/emctx.json"\n')
+        render_res.push('provide("emctx", emctx)\n')
+        render_res.push('import Document from "@/Document.vue"\n')
         render_res.push(this.tokenizer.get_component_imports(tokener_state))
         render_res.push("</script>\n")
-        console.log(render_res.join(""))
+
+        let config = tokener_state.config
+
+        let page_info = {
+            title : config?.title
+        }   
+
+        return [render_res.join(""), page_info]
     }
 
 
 }
 
-export type func_rule = (evomark_core) => void
+export type func_rule = (core: evomark_core) => void

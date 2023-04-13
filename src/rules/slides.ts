@@ -5,11 +5,11 @@ import { evomark_parser, parse_node, parse_rule_func, parse_state } from "../par
 import { evomark_tokenizer, get_close_tag, get_closed_tag, get_open_tag, get_tag_pair, push_warning, token, tokenize_rule_func, tokener_state } from "../tokenize";
 
 
-function parse_slides(src: string, state: parse_state, param: any, parser: evomark_parser): boolean{
+function parse_slides(src: string, state: parse_state, param: any, parser: evomark_parser): boolean {
     parser.parse_core(src, state)
-    for(let child of state.curr_node.children){
-        if(child.type!="text"){
-            if(child.type=="func" && child.content!="slide"){
+    for (let child of state.curr_node.children) {
+        if (child.type != "text") {
+            if (child.type == "func" && child.content != "slide") {
                 state.push_warning_node_to_root("Only #slide is allowed in #slides")
             }
         }
@@ -17,29 +17,29 @@ function parse_slides(src: string, state: parse_state, param: any, parser: evoma
     return true
 }
 
-function tokenize_slides(root: parse_node, tokens: token[], tokener: evomark_tokenizer, state: tokener_state){
-    if(root.children.length==0){
+function tokenize_slides(root: parse_node, tokens: token[], tokener: evomark_tokenizer, state: tokener_state) {
+    if (root.children.length == 0) {
         push_warning("#slides must have body", tokens)
         return
     }
     let body: parse_node, param: any
-    if(root.children.length==1){
-        if(root.children[0].type!="func_body"){
+    if (root.children.length == 1) {
+        if (root.children[0].type != "func_body") {
             push_warning("#slides must have body", tokens)
             return
         }
-        else{
+        else {
             param = {}
             body = root.children[0]
         }
-            
+
     }
-    if(root.children.length==2){
-        if(root.children[0].type!="func_param" || root.children[1].type!="func_body"){
+    if (root.children.length == 2) {
+        if (root.children[0].type != "func_param" || root.children[1].type != "func_body") {
             push_warning("Improper #slides", tokens)
             return
         }
-        else{
+        else {
             param = root.children[0]
             body = root.children[1]
         }
@@ -47,60 +47,78 @@ function tokenize_slides(root: parse_node, tokens: token[], tokener: evomark_tok
     let [open, close] = get_tag_pair("SlidesBox")
     tokens.push(open)
     state.env["slide"] = true
+    state.env["clk"] = []
     tokener.tokenize_core(body, tokens, state)
+    state.env["clk"] = null
     state.env["slide"] = false
     tokens.push(close)
 }
 
-function parse_slide(src: string, state: parse_state, param: any, parser: evomark_parser): boolean{
+function parse_slide(src: string, state: parse_state, param: any, parser: evomark_parser): boolean {
     return parser.parse_core(src, state)
 }
 
-function tokenize_slide(root: parse_node, tokens: token[], tokener: evomark_tokenizer, state: tokener_state){
-    let [open0, close0] = get_tag_pair("VueperSlide")
-    let [open1, close1] = get_tag_pair("SlidesContent")
-    tokens.push(open0)
-    tokens.push(open1)
+function tokenize_slide(root: parse_node, tokens: token[], tokener: evomark_tokenizer, state: tokener_state) {
+    let [open, close] = get_tag_pair("Slide")
+    tokens.push(open)
     for (let child of root.children) {
         if (child.type == "func_body") {
             tokener.tokenize_core(child, tokens, state)
         }
     }
-    tokens.push(close1)
-    tokens.push(close0)
+    tokens.push(close)
 }
 
 
-function parse_clk(src: string, state: parse_state, param: any, parser: evomark_parser): boolean{
+function parse_clk(src: string, state: parse_state, param: any, parser: evomark_parser): boolean {
     return parser.parse_core(src, state)
 }
 
-function tokenize_clk(root: parse_node, tokens: token[], tokener: evomark_tokenizer, state: tokener_state){
-    if(!state.env["slide"]){
+function tokenize_clk(root: parse_node, tokens: token[], tokener: evomark_tokenizer, state: tokener_state) {
+    if (!state.env["slide"]) {
         push_warning("#clk can only be used inside a #slides", tokens)
         return
     }
-    let [open0, close0] = get_tag_pair("SlidesControl")
-    tokens.push(open0)
+
+    let clk_in = -1
     for (let child of root.children) {
+        if (child.type == "func_param") {
+            clk_in = Number(child.content)
+        }
         if (child.type == "func_body") {
+            // Check whether there is a valid clk_in id from param
+            if (Number.isNaN(clk_in)) {
+                push_warning("Invalid order for clk", tokens)
+                break
+            }
+            else {
+                if (clk_in < 0) {
+                    clk_in = Math.ceil(Math.max(state.env["clk"]))+1
+                }
+            }
+            let [open, close] = get_tag_pair("SlidesControl")
+            open.attrs[":clkIn"] = clk_in.toString()
+            state.env["clk"].push(clk_in)
+            tokens.push(open)
             tokener.tokenize_core(child, tokens, state)
+            tokens.push(close)
+            break
         }
     }
-    tokens.push(close0)
 }
 
 
-function parse_voice(src: string, state: parse_state, param: any, parser: evomark_parser): boolean{
+function parse_voice(src: string, state: parse_state, param: any, parser: evomark_parser): boolean {
     // TODO check whether the input is full text
     return true
 }
 
-function tokenize_voice(root: parse_node, tokens: token[], tokener: evomark_tokenizer, state: tokener_state){
+function tokenize_voice(root: parse_node, tokens: token[], tokener: evomark_tokenizer, state: tokener_state) {
     let tag = get_closed_tag("SlidesVoiceBox")
     for (let child of root.children) {
         if (child.type == "func_body") {
-            tag.attrs = {text:child.content.trim()}
+            tag.attrs = { text: child.content.trim() }
+            tokens.push(tag)
             break
         }
     }
@@ -108,7 +126,7 @@ function tokenize_voice(root: parse_node, tokens: token[], tokener: evomark_toke
 
 
 
-export function slides(core: evomark_core){
+export function slides(core: evomark_core) {
 
     core.parser.add_func_rule(new parse_rule_func("slides", parse_slides))
     core.tokenizer.add_func_rule(new tokenize_rule_func("slides", tokenize_slides))
@@ -118,10 +136,12 @@ export function slides(core: evomark_core){
     core.tokenizer.add_func_rule(new tokenize_rule_func("clk", tokenize_clk))
     core.parser.add_func_rule(new parse_rule_func("voice", parse_voice))
     core.tokenizer.add_func_rule(new tokenize_rule_func("voice", tokenize_voice))
-    
+
     core.register_modules("slides", {
         "SlidesBox": "@/slides/SlidesBox.vue",
         "Slide": "@/slides/Slide.vue",
+        "SlidesControl": "@/slides/SlidesControl.vue",
+        "SlidesVoiceBox": "@/slides/SlidesVoiceBox.vue",
     })
 }
 

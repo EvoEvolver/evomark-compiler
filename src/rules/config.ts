@@ -5,7 +5,7 @@ import { parse_dict } from "../utils/dict";
 
 export function make_config_rule(func_name: string, namespace: string) {
     function parse(src: string, state: parse_state, param: any, parser: evomark_parser): boolean {
-        let lang = "json"
+        let lang = "toml"
         if (typeof param === 'string') {
             lang = param
         }
@@ -20,7 +20,7 @@ export function make_config_rule(func_name: string, namespace: string) {
             let node = state.push_node("config_dict")
             node.content = namespace
             node.content_obj = config_dict
-            Object.assign(state.config[namespace], config_dict) 
+            state.assign_to_config(config_dict, namespace)
         }
         return true
     }
@@ -36,4 +36,4 @@ export function make_config_rule(func_name: string, namespace: string) {
     return config
 }
 
-export var config = make_config_rule("config", "env")
+export var config = make_config_rule("config", null)

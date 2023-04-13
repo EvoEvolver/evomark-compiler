@@ -19,7 +19,7 @@ export class evomark_parser {
 
     public add_func_rule(rule: parse_rule_func) {
         if (rule.name in this.parse_rules_func)
-            throw Error("Trying to add a rule of the same name")
+            throw Error("Trying to add a rule of the same name: " + rule.name)
         this.parse_rules_func[rule.name] = rule
     }
 
@@ -50,6 +50,8 @@ export class evomark_parser {
 
         while (true) {
             let param = parse_func_param(src, state)
+            if(param === false)
+                param = null
             let body_node = parse_func_body(src, state)
 
             if ((!param) && (!body_node)) {
@@ -119,18 +121,6 @@ export class evomark_parser {
                 node.content = content
             }
             state.pos = i
-        }
-
-        if (change_line_break) {
-            //let node = state.push_node("tag")
-            //node.content = "br"
-            let j = i + 2
-            for (; j < state.end; j++) {
-                if (!/\s\n/.test[src[j]]) {
-                    break
-                }
-            }
-            state.pos = j
         }
 
 
@@ -208,7 +198,21 @@ export class evomark_parser {
         while (state.pos != state.end) {
             // Merge multiple \n
             if (src[state.pos] == "\n") {
-                state.pos++
+                let n_newline = 0
+                let i = state.pos
+                for (; i < state.end; i++) {
+                    if (!(/[\s\n]/.test(src[i]))) {
+                        break
+                    }
+                    else {
+                        if (src[i] == "\n")
+                            n_newline++
+                    }
+                }
+                // Add a new line
+                if (n_newline >= 2)
+                    state.push_node("sep")
+                state.pos = i
                 continue
             }
             // Try rules
@@ -224,8 +228,8 @@ export class evomark_parser {
         return true
     }
 
-    public parse(src: string): [parse_node, parse_state] {
-        let state = new parse_state(src)
+    public parse(src: string, emconfig: any): [parse_node, parse_state] {
+        let state = new parse_state(src, emconfig)
         state.config = this.init_state_config()
         this.parse_core(src, state)
         return [state.root_node, state]
@@ -253,6 +257,7 @@ export function parse_identifier(src: string, state: parse_state): string {
 }
 
 export class parse_state {
+    // Configs used for parse and tokenize.
     public config = {}
     public ref_table: Record<string, parse_node> = {}
     public pos = 0
@@ -260,10 +265,20 @@ export class parse_state {
     public end = -1
     public curr_node: parse_node
     public root_node: parse_node
-    public constructor(src: string) {
+    public constructor(src: string, emconfig: any) {
         this.end = src.length
+        // Load the global config
+        Object.assign(this.config, emconfig)
         this.curr_node = new parse_node("root")
         this.root_node = this.curr_node
+    }
+    public assign_to_config(config: any, namespace: string) {
+        if (namespace === null) {
+            Object.assign(this.config, config)
+        }
+        else {
+            Object.assign(this.config[namespace], config)
+        }
     }
     public push_node(type: string): parse_node {
         return this.curr_node.push_child(type)
