@@ -17,9 +17,9 @@ export function make_config_rule(func_name: string, namespace: string) {
             config_src = ["{", config_src, "}"].join("\n")
         let config_dict = parse_dict(config_src, lang, state)
         if (config_dict) {
-            let node = state.push_node("config_dict")
-            node.content = namespace
-            node.content_obj = config_dict
+            let node = state.push_node("hidden_literal")
+            node.content = config_src.trim()
+            //node.content_obj = config_dict
             state.assign_to_config(config_dict, namespace)
         }
         return true

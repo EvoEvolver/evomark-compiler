@@ -44,7 +44,7 @@ export function load_evomark(file_path: string, input_base: string, output_base:
         rendered = res[0]
         page_info = res[1]
     } catch (error) {
-        rendered = "<pre><code>" + error.message + "\n" + error.stack + "</code></pre>"
+        rendered = "<template><pre><code>" + error.message + "\n" + error.stack + "</code></pre></template>"
     }
     //console.log(rendered)
     write_file(output_path, rendered)

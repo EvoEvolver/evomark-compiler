@@ -9,7 +9,7 @@ export class evomark_tokenizer {
 
     public modules: Record<string, any>
 
-    public init_state_config = ()=>{
+    public init_state_config = () => {
         return {}
     }
 
@@ -19,7 +19,7 @@ export class evomark_tokenizer {
         this.tokenize_rules_func = {}
         this.add_func_rule(new tokenize_rule_func("box", tokenize_box))
         this.modules = {
-            ref_def : {
+            ref_def: {
                 Referred: "@/Referred.vue"
             }
         }
@@ -32,49 +32,57 @@ export class evomark_tokenizer {
     }
 
     public tokenize_core(root: parse_node, tokens: token[], state: tokener_state) {
-        for (let child of root.children) {
-            switch (child.type) {
+        for (let node of root.children) {
+            switch (node.type) {
                 case "text": {
                     tokens.push(get_open_tag("span").set_class("text"))
-                    tokens.push(new token("text", child.content))
+                    tokens.push(new token("text", node.content))
                     tokens.push(get_close_tag("span"))
                     break
                 }
                 case "func": {
-                    let func_name = child.content
+                    let func_name = node.content
                     let rule = this.tokenize_rules_func[func_name]
                     state.used_func[func_name] = ""
-                    if (!rule){
+                    if (!rule) {
                         //throw Error("No tokenizer for function " + func_name)
                         rule = this.tokenize_rules_func["box"]
                         push_warning("No tokenizer for function " + func_name, tokens)
                     }
-                    rule.tokenize(child, tokens, this, state)
+                    rule.tokenize(node, tokens, this, state)
                     break
                 }
-                case "ref":{
-                    let ref_name = child.content
-                    if(!("ref_def" in state.used_func)){
+                case "ref": {
+                    let ref_name = node.content
+                    if (!("ref_def" in state.used_func)) {
                         state.used_func["ref_def"] = ""
                     }
-                    let [open, close] = get_tag_pair("Referred")
-                    open.attrs["id"] = ref_name
-                    open.attrs["func"] = child.children[0].content
-                    tokens.push(open)
-                    this.tokenize_core(child, tokens, state)
-                    tokens.push(close)
+                    node.meta["ref_data"] = {id: ref_name, display_name: node.children[0].content}
+                    if (!node.children[0].meta["handle_ref"]) {
+                        let [open, close] = get_tag_pair("Referred")
+                        open.attrs["id"] = ref_name
+                        //open.attrs["func"] = child.children[0].content
+                        tokens.push(open)
+                        this.tokenize_core(node, tokens, state)
+                        tokens.push(close)
+                    }
+                    else{
+                        node.children[0].meta["ref_name"] = ref_name
+                        this.tokenize_core(node, tokens, state)
+                    }
+
                     break
                 }
-                case "sep":{
+                case "sep": {
                     tokens.push(new tag_token("br", 0, null))
                     break
                 }
                 case "warning": {
-                    push_warning(child.content, tokens)
+                    push_warning(node.content, tokens)
                     break
                 }
                 default: {
-                    throw Error("Node of " + child.type + " must be handled by a specific tokenizer")
+                    throw Error("Node of " + node.type + " must be handled by a specific tokenizer")
                 }
             }
         }
@@ -87,31 +95,42 @@ export class evomark_tokenizer {
         return [tokens, state]
     }
 
-    public get_component_imports(state: tokener_state){
+    public get_component_imports(state: tokener_state) {
         let used_func = state.used_func
         let res = []
-        for(let func_name in used_func){
+        for (let func_name in used_func) {
             let modules = this.modules[func_name]
-            if(!modules)
+            if (!modules)
                 continue
-            for(let module_name in modules){
+            for (let module_name in modules) {
                 let module_path = modules[module_name]
                 res.push(`import ${module_name} from "${module_path}"\n`)
             }
         }
         return res.join("")
     }
-
 }
 
-export class tokener_state{
+export class tokener_state {
     public config: any = null
     public ref_table: Record<string, parse_node>
     public used_func: any = {}
     public env: Record<string, any> = {}
-    public constructor(parse_state: parse_state){
+    public constructor(parse_state: parse_state) {
         this.ref_table = parse_state.ref_table
         this.config = parse_state.config
+    }
+    public available_index = {}
+    public get_available_index(display_name: string): number {
+        let index = this.available_index[display_name]
+        if (index) {
+            this.available_index[display_name]++
+            return index
+        }
+        else {
+            this.available_index[display_name] = 2
+            return 1
+        }
     }
 }
 
@@ -143,24 +162,24 @@ export class tag_token extends token {
     }
     public write(): string {
         let tag = ["<", this.tag_type != 1 ? "" : "/", this.content, write_attr(this.attrs), this.tag_type != 2 ? "" : "/", ">"].join("")
-        if(["span", "strong"].indexOf(this.content)<0){
-            return tag+"\n"
+        if (["span", "strong"].indexOf(this.content) < 0) {
+            return tag + "\n"
         }
-        else{
+        else {
             return tag
         }
     }
-    public set_attr(attrs: html_attr): tag_token{
+    public set_attr(attrs: html_attr): tag_token {
         this.attrs = attrs
         return this
     }
-    public set_class(className: string): tag_token{
+    public set_class(className: string): tag_token {
         this.attrs["class"] = className
         return this
     }
 }
 
-export function push_warning(message: string, tokens: token[]){
+export function push_warning(message: string, tokens: token[]) {
     tokens.push(get_open_tag("Warning"))
     tokens.push(new token("text", message))
     tokens.push(get_close_tag("Warning"))

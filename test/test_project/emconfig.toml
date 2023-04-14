@@ -1,5 +1,5 @@
 project_title = "Evomark Test Project"
-contents = ["index", "about"]
+contents = ["index", "about", "structure"]
 chat_url = "https://gitter.im/EvoEvolver/community"
 git_repo_url = "https://github.com/EvoEvolver/evomark-framework/tree/main/docs_src"
 [license]

@@ -1,6 +1,6 @@
 
 
-import { parse_func_body, parse_func_param } from "./parse_func"
+import { parse_func, parse_func_body, parse_func_param } from "./parse_func"
 import { parse_ref } from "./parse_ref"
 
 
@@ -23,76 +23,7 @@ export class evomark_parser {
         this.parse_rules_func[rule.name] = rule
     }
 
-    public parse_func(src: string, state: parse_state): boolean {
-        let start = state.pos
-
-        if (start == state.end - 1) {
-            return false
-        }
-
-        if (src[start] != "#" || !valid_identifier_name_char.test(src[start + 1])) {
-            return false
-        }
-
-        state.pos++
-        let func_name = parse_identifier(src, state)
-
-        // TODO look up func_name table
-        let rule = this.parse_rules_func[func_name]
-        if (!rule) {
-            console.log("Cannot find rule name " + func_name)
-            rule = this.parse_rules_func["box"]
-        }
-
-        let func_node = state.push_node("func")
-        func_node.content = func_name
-        state.curr_node = func_node
-
-        while (true) {
-            let param = parse_func_param(src, state)
-            if(param === false)
-                param = null
-            let body_node = parse_func_body(src, state)
-
-            if ((!param) && (!body_node)) {
-                // Grammar sugar
-                // Handle multi func like `#clk#box{}`
-                // So that users don't write `#clk{#box{}}`
-                if (src[state.pos] == "#") {
-                    let all_param_node = true
-                    for (let child of func_node.children) {
-                        if (child.type != "func_param") {
-                            all_param_node = false
-                            break
-                        }
-                    }
-                    if (!all_param_node)
-                        break
-                    // Try to parse following as func
-                    let body_node = new parse_node("func_body")
-                    state.curr_node = body_node
-                    if (this.parse_func(src, state)) {
-                        func_node.children.push(body_node)
-                    }
-                    state.curr_node = func_node
-                }
-                else
-                    break
-            }
-            if (body_node) {
-                let [body_start, body_end] = body_node.delim
-                let saved = state.set_local_state(body_start, body_start, body_end, body_node)
-                rule.parse(src, state, param, this)
-                state.restore_state(saved)
-            }
-        }
-
-        state.curr_node = state.curr_node.parent
-
-        return true
-    }
-
-    public parse_inline(src: string, state: parse_state): boolean {
+    public parse_text(src: string, state: parse_state): boolean {
         let start = state.pos
 
         let i = start
@@ -118,20 +49,24 @@ export class evomark_parser {
             let content = src.slice(start, i)
             if (content.length != 0) {
                 let node = state.push_node("text")
-                node.content = content
+                node.delim = [start, i]
+                let trimed = content.replace(/^[ \t]+|[ \t]+$/g, '')
+                if(trimed[trimed.length-1]!="\n")
+                    trimed = trimed+" "
+                if(content[0]==" ")
+                    trimed = " "+trimed
+                node.content = trimed
             }
             state.pos = i
         }
-
-
         return succ
-
     }
 
     public parse_ref_assign(src: string, state: parse_state): boolean {
         let ref_name = parse_ref(src, state)
         if (!ref_name)
             return false
+        let start = state.pos
         let i = state.pos
         let found_equal = false
         for (; i < state.end; i++) {
@@ -167,7 +102,8 @@ export class evomark_parser {
                 let ref_node = state.push_node("ref")
                 ref_node.content = ref_name
                 state.curr_node = ref_node
-                let succ = this.parse_func(src, state)
+                let succ = parse_func(src, state, this)
+                ref_node.delim = [start, state.pos]
                 if (!succ) {
                     state.push_warning_node_to_root("\"@" + ref_name + " = \" must be followed with a function")
                 }
@@ -177,7 +113,7 @@ export class evomark_parser {
                         state.push_warning_node("Redefining " + ref_name + "!")
                     }
                     else {
-                        state.ref_table[ref_name] = ref_node.children[0]
+                        state.ref_table[ref_name] = ref_node//.children[0]
                     }
 
                 }
@@ -216,9 +152,9 @@ export class evomark_parser {
                 continue
             }
             // Try rules
-            if (this.parse_inline(src, state))
+            if (this.parse_text(src, state))
                 continue
-            if (this.parse_func(src, state))
+            if (parse_func(src, state, this))
                 continue
             if (this.parse_ref_assign(src, state))
                 continue
@@ -326,7 +262,7 @@ export class parse_node {
     public type: string
     public content: string = ""
     public content_obj: any = null
-    public state: any = null
+    public meta: any = {}
     public constructor(type: string) {
         this.type = type
     }

@@ -4,6 +4,8 @@ import { evomark_tokenizer, get_closed_tag, get_tag_pair, token, tokener_state, 
 import { renderToString } from "katex"
 
 function parse(src: string, state: parse_state, param: any, parser: evomark_parser): boolean {
+    let node = state.push_node("hidden_literal")
+    node.content = state.slice_range(src).trim()
     return true
 }
 
@@ -26,7 +28,5 @@ function tokenize(root: parse_node, tokens: token[], tokener: evomark_tokenizer,
 }
 
 export function equ(core: evomark_core) {
-    core.add_rule("equ", parse, tokenize, {
-       // "Equ": "@/Equ.vue"
-    })
+    core.add_rule("equ", parse, tokenize, {})
 }

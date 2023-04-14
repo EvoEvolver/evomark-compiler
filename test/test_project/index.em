@@ -3,10 +3,14 @@
 }
 
 
+$$1 = $def{
+    This is the back ground of the story!
+}
+
 #sec{Hello world!} 
 
 @a = 
-#list{
+#remark#list{
     Here is a list
 }{
     I am the second item
@@ -14,7 +18,21 @@
 
 #ref{@a} is an awesome list!
 
+@1 = $prompt{
+    $put(@background)
+    Based on the back ground, we want to ask:
 
+}
+
+$$$res(DA2AD27HAJK2){
+
+}
+
+$show($gen(@1))
+
+@2 = $summarize{
+
+}
 
 #slides{
     #slide{

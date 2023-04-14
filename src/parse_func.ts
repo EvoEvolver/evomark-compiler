@@ -1,4 +1,4 @@
-import { parse_node, parse_state } from "./parse"
+import { evomark_parser, parse_identifier, parse_node, parse_rule_func, parse_state, valid_identifier_name_char } from "./parse"
 import { find_next_pairing_ignore_quote } from "./utils/parse"
 import { parse } from "relaxed-json"
 
@@ -28,7 +28,7 @@ export function parse_func_param(src: string, state: parse_state): any {
     else{
         node.content_obj = parse(["{",param_src,"}"].join(""))
     }
-
+    node.delim = [start, state.pos]
     state.pos = next + 1
     return node.content_obj
 }
@@ -44,8 +44,100 @@ export function parse_func_body(src: string, state: parse_state): parse_node {
         return null
     let param_src = src.slice(start + 1, next)
     let node = state.push_node("func_body")
-    node.delim = [start + 1, next]
+    node.delim = [start+1, next]
     node.content = param_src
     state.pos = next + 1
     return node
+}
+export function parse_func(src: string, state: parse_state, parser: evomark_parser): boolean {
+    let succ = parse_func_skeleton(src, state, parser)
+    if(!succ)
+        return false
+    // TODO look up func_name table
+    let func_name = state.curr_node.content
+    let rule = parser.parse_rules_func[func_name]
+    if (!rule) {
+        console.log("Cannot find rule name " + func_name)
+        rule = parser.parse_rules_func["box"]
+    }
+    parse_func_children(src, state, parser, rule)
+
+    state.curr_node = state.curr_node.parent
+    return true
+}
+
+export function parse_func_skeleton(src: string, state: parse_state, parser: evomark_parser): boolean {
+    let start = state.pos
+
+    if (start == state.end - 1) {
+        return false
+    }
+
+    if (src[start] != "#" || !valid_identifier_name_char.test(src[start + 1])) {
+        return false
+    }
+
+    state.pos++
+    let func_name = parse_identifier(src, state)
+    let func_node = state.push_node("func")
+    func_node.meta["id_delim"] = [start, state.pos]
+    func_node.content = func_name
+    state.curr_node = func_node
+    func_node.delim = [start]
+
+    while (true) {
+        let param = parse_func_param(src, state)
+        if(param === false)
+            param = null
+        let body_node = parse_func_body(src, state)
+
+        if ((!param) && (!body_node)) {
+            // Grammar sugar
+            // Handle multi func like `#clk#box{}`
+            // So that users don't write `#clk{#box{}}`
+            if (src[state.pos] == "#") {
+                let all_param_node = true
+                for (let child of func_node.children) {
+                    if (child.type != "func_param") {
+                        all_param_node = false
+                        break
+                    }
+                }
+                if (!all_param_node)
+                    break
+                // Try to parse following as func
+                let fake_body_node = new parse_node("func_body")
+                let func_start_pos = state.pos
+                state.curr_node = fake_body_node
+                if (parse_func_skeleton(src, state, parser)) {
+                    let real_body_node = new parse_node("func_body")
+                    real_body_node.delim = [func_start_pos, state.pos]
+                    real_body_node.content = src.slice(func_start_pos, state.pos)
+                    func_node.add_child(real_body_node)
+                    // state.pos will remain in the state after parsing the fake_body_node
+                }
+                state.curr_node = func_node
+            }
+            else
+                break
+        }
+    }
+    func_node.delim.push(state.pos)
+    return true
+}
+
+function parse_func_children(src: string, state: parse_state, parser: evomark_parser, rule: parse_rule_func){
+    let param: any = null
+    for(let node of state.curr_node.children){
+        if (node.type == "func_param") {
+            param = node.content_obj
+        }
+        if (node.type == "func_body") {
+            let [body_start, body_end] = node.delim
+            let saved = state.set_local_state(body_start, body_start, body_end, node)
+            rule.parse(src, state, param, parser)
+            state.restore_state(saved)
+            param = null
+        }
+    }
 }

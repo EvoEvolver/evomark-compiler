@@ -1,49 +1,24 @@
 #config{
-    title = "Hello world"
+title = "Hello world"
+title5 = "Hello world"
 }
-
-#author{
-    author = "Zijian"
-}
-
-hello
-
-#config(src:"info.toml")
-
-first_line
-second_line
 
 @adsa = 
-#box
-{
-    #box{
-        #list{
-            adsadasd
-        }{
-            dasddsadas
-        }
+#box{
+    #list{
+        first
+    }{
+        second
     }
-}
-{
-    dasdasd
 }
 
 #figure(irena.jpg){
     This is irena.
 }
 
-#figure(){
-
-}
-
 See #ref{@asds} for detail. 
-#cite{dasdas}{dsa}
+
 
 #equ{
     \ket{\phi}
 }
-{
-    \ket{\phi}
-}
-
-2
