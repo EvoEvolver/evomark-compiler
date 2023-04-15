@@ -4,7 +4,7 @@ import * as fs from 'fs'
 import { evomark_core } from "./core"
 import { make_default_core } from "./default"
 let parser = new evomark_parser()
-let src: string = fs.readFileSync("../test/example.em", { encoding: 'utf8' })
+let src: string = fs.readFileSync("../test/cmd.em", { encoding: 'utf8' })
 let core = make_default_core()
 let [root, parse_state] = core.parser.parse(src, null)
 
@@ -56,14 +56,18 @@ function stringify_core(root: parse_node, indent: number, res: string[], cl_pos:
     for (let i = 0; i < root.children.length; i++) {
         let node = root.children[i]
         switch (node.type) {
+            case "cmd":
             case "func": {
-                push_with_indent("#" + node.content, res, indent)
+                let starter = "#"
+                if(node.type == "cmd") starter = "$"
+                push_with_indent(starter + node.content, res, indent)
                 stringify_core(node, indent, res, cl_pos)
                 if (new_line_between_pos(node.delim[1], root.children[i + 1]?.delim[0], cl_pos)) {
                     push_with_indent("\n", res, indent)
                 }
                 break
             }
+            case "cmd_body":
             case "func_body": {
                 push_with_indent("{", res, 0)
                 if (new_line_between_pos(node.delim[0] - 1, node.children[0]?.delim[0], cl_pos)) {
@@ -82,6 +86,7 @@ function stringify_core(root: parse_node, indent: number, res: string[], cl_pos:
                 }
                 break
             }
+            case "cmd_param":
             case "func_param": {
                 res.push("(")
                 res.push(JSON.stringify(node.content_obj))
@@ -90,6 +95,11 @@ function stringify_core(root: parse_node, indent: number, res: string[], cl_pos:
             }
             case "ref": {
                 push_with_indent("@" + node.content + "=\n", res, indent)
+                stringify_core(node, indent, res, cl_pos)
+                break
+            }
+            case "var_assign": {
+                push_with_indent("%" + node.content + "=\n", res, indent)
                 stringify_core(node, indent, res, cl_pos)
                 break
             }

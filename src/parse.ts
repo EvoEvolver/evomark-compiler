@@ -1,10 +1,11 @@
 
 
 import { parse_cmd, parse_cmd_var } from "./parse_cmd"
-import { parse_func, parse_func_body, parse_func_param } from "./parse_func"
-import { parse_ref, parse_ref_assign } from "./parse_ref"
+import { parse_func } from "./parse_func"
+import { parse_ref_assign } from "./parse_ref"
 import { parse_text } from "./parse_text"
 import { simple_parser } from "./func_rule/common"
+import { cmd_exec_state } from "./cmd_exec"
 
 
 export class evomark_parser {
@@ -18,6 +19,7 @@ export class evomark_parser {
 
     public constructor() {
         this.func_rules = {}
+        this.cmd_rules = {}
         this.add_func_rule(new func_rule("box", simple_parser))
     }
 
@@ -27,6 +29,11 @@ export class evomark_parser {
         this.func_rules[rule.name] = rule
     }
 
+    public add_cmd_rule(rule: cmd_rule) {
+        if (rule.name in this.func_rules)
+            throw Error("Trying to add a rule of the same name: " + rule.name)
+        this.cmd_rules[rule.name] = rule
+    }
 
     public parse_core(src: string, state: parse_state): boolean {
         while (state.pos != state.end) {
@@ -110,6 +117,7 @@ export class parse_state {
         Object.assign(this.config, emconfig)
         this.curr_node = new parse_node("root")
         this.root_node = this.curr_node
+        this.cmd_exec_state = new cmd_exec_state()
     }
     public assign_to_config(config: any, namespace: string) {
         if (namespace === null) {
@@ -132,7 +140,7 @@ export class parse_state {
         node.content = message
         return node
     }
-    public pop_node() {
+    public pop_curr_node() {
         this.curr_node = this.curr_node.parent
     }
     public set_local_state(pos: number, start: number, end: number, curr_node: parse_node) {
@@ -164,7 +172,7 @@ export class parse_node {
     public delim: number[] = [-1, -1]
     public type: string
     public content: string = ""
-    public content_obj: any = null
+    public content_obj: any = {}
     public meta: any = {}
     public constructor(type: string) {
         this.type = type

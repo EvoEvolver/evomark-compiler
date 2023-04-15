@@ -8,4 +8,4 @@ let src: string  = fs.readFileSync("../test/cmd.em", {encoding:'utf8'})
 let core = make_default_core()
 let [rendered, state] = core.process(src, null)
 
-console.log(rendered)
+//console.log(rendered)

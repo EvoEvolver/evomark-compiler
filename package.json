@@ -6,9 +6,11 @@
     "typescript": "^5.0.3"
   },
   "dependencies": {
+    "@types/spark-md5": "^3.0.2",
     "katex": "^0.16.4",
     "node-dir": "^0.1.17",
     "relaxed-json": "^1.0.3",
+    "spark-md5": "^3.0.2",
     "toml": "^3.0.0"
   }
 }

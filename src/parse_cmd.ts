@@ -1,5 +1,5 @@
-import { evomark_parser, parse_identifier, parse_state } from "./parse"
-import { parse_func_skeleton } from "./parse_func"
+import { evomark_parser, parse_identifier, parse_node, parse_state } from "./parse"
+import { get_parse_skeleton, parse_func_skeleton } from "./parse_func"
 import { find_next } from "./utils/parse"
 
 export function parse_cmd_var_name(src: string, state: parse_state): string {
@@ -42,9 +42,12 @@ export function parse_cmd_var_assign(src: string, state: parse_state, parser: ev
         let var_node = state.push_node("var_assign")
         var_node.content = var_name
         state.curr_node = var_node
-        let succ = parse_cmd(src, state, parser)
-        if (succ) {
+        let cmd_node = parse_cmd(src, state, parser)
+        if (cmd_node !== null) {
             // TODO
+            var_node.content_obj["result"] = cmd_node.content_obj["result"]
+            console.log(var_node.content_obj["result"])
+            state.cmd_exec_state.add_var(var_node)
         }
         state.curr_node = var_node
         return true
@@ -55,9 +58,21 @@ export function parse_cmd_var_assign(src: string, state: parse_state, parser: ev
     }
 }
 
-export function parse_cmd(src: string, state: parse_state, parser: evomark_parser): boolean {
+
+export const parse_cmd_skeleton = get_parse_skeleton("cmd", "$")
+
+export function parse_cmd(src: string, state: parse_state, parser: evomark_parser): parse_node {
     if (src[state.pos] != "$")
-        return false
-    parse_func_skeleton(src, state, parser, "$")
-    return true
+        return null
+    let succ = parse_cmd_skeleton(src, state, parser)
+    if (!succ)
+        return null
+    let cmd_node = state.curr_node
+    let rule = parser.cmd_rules[cmd_node.content]
+    if(rule)
+        rule.parse(src, state, parser)
+    else
+        state.push_warning_node_to_root("Cannot find rule for cmd "+cmd_node.content)
+    state.pop_curr_node()
+    return cmd_node
 }

@@ -8,10 +8,13 @@ import { ref } from "./func_rule/ref"
 import { section } from "./func_rule/sec"
 import { em } from "./func_rule/simple_rules"
 import { remark } from "./func_rule/remark"
+import { def } from "./cmd_rule/def"
+import { hello } from "./cmd_rule/hello"
+import { cache } from "./cmd_rule/cache"
 
 export function make_default_core(): evomark_core {
     let core = new evomark_core()
-    
+    // func rules
     equ(core)
     config(core)
     make_config_rule("author", "author")(core)
@@ -22,6 +25,11 @@ export function make_default_core(): evomark_core {
     section(core)
     em(core)
     remark(core)
+
+    // cmd rules
+    def(core)
+    hello(core)
+    cache(core)
 
     return core
 }
