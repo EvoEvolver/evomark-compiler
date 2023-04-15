@@ -2,10 +2,7 @@ import { evomark_core } from "../core"
 import { evomark_parser, parse_node, parse_rule_func, parse_state } from "../parse";
 import { evomark_tokenizer, get_closed_tag, get_tag_pair, token, tokener_state, tokenize_rule_func } from "../tokenize";
 import { renderToString } from "katex"
-
-function parse(src: string, state: parse_state, param: any, parser: evomark_parser): boolean {
-    return true
-}
+import { simple_literal_parser } from "./common";
 
 function tokenize(root: parse_node, tokens: token[], tokener: evomark_tokenizer, state: tokener_state) {
     for (let child of root.children) {
@@ -26,7 +23,7 @@ function tokenize(root: parse_node, tokens: token[], tokener: evomark_tokenizer,
 }
 
 export function code(core: evomark_core) {
-    core.add_rule("code", parse, tokenize, {
+    core.add_rule("code", simple_literal_parser, tokenize, {
        "Code": "@/Code.vue"
     })
 }

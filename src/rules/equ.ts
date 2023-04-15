@@ -2,12 +2,8 @@ import { evomark_core } from "../core"
 import { evomark_parser, parse_node, parse_rule_func, parse_state } from "../parse";
 import { evomark_tokenizer, get_closed_tag, get_tag_pair, token, tokener_state, tokenize_rule_func } from "../tokenize";
 import { renderToString } from "katex"
+import { simple_literal_parser } from "./common";
 
-function parse(src: string, state: parse_state, param: any, parser: evomark_parser): boolean {
-    let node = state.push_node("hidden_literal")
-    node.content = state.slice_range(src).trim()
-    return true
-}
 
 function tokenize(root: parse_node, tokens: token[], tokener: evomark_tokenizer, state: tokener_state) {
     for (let child of root.children) {
@@ -28,5 +24,5 @@ function tokenize(root: parse_node, tokens: token[], tokener: evomark_tokenizer,
 }
 
 export function equ(core: evomark_core) {
-    core.add_rule("equ", parse, tokenize, {})
+    core.add_rule("equ", simple_literal_parser, tokenize, {})
 }

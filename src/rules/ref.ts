@@ -4,25 +4,29 @@ import { parse_ref } from "../parse_ref";
 import { evomark_tokenizer, get_closed_tag, get_tag_pair, push_warning, token, tokenize_rule_func, tokener_state } from "../tokenize";
 
 
-function parse(src: string, state: parse_state, param: any, parser: evomark_parser): boolean {
-    let content = state.slice_range(src).trim()
-    //let content = param
-    if (content[0] != "@") {
-        state.push_warning_node_to_root("#ref must contain a ref (like #ref{@my_ref})")
-        state.curr_node.content = null
+function parse(src: string, state: parse_state, parser: evomark_parser) {
+    for (let node of state.curr_node.children) {
+        if (node.type != "func_body")
+            continue
+        let content = src.slice(node.delim[0], node.delim[1]).trim()
+        if (content[0] != "@") {
+            state.push_warning_node_to_root("#ref must contain a ref (like #ref{@my_ref})")
+            node.content = null
+            break
+        }
+        let ref_name = content.slice(1)
+        if (is_valid_identifier(ref_name)) {
+            node.content = ref_name
+            let child_node = node.add_child(new parse_node("hidden_literal"))
+            child_node.content = content
+            child_node.delim = node.delim
+        }
+        else {
+            node.content = null
+            state.push_warning_node_to_root("#ref must contain a ref (like #ref{@my_ref})")
+        }
+        break
     }
-    let ref_name = content.slice(1)
-    if (is_valid_identifier(ref_name)) {
-        state.curr_node.content = ref_name
-        let node = state.push_node("hidden_literal")
-        node.content = content
-        node.delim = [state.start, state.end]
-    }
-    else {
-        state.curr_node.content = null
-        state.push_warning_node_to_root("#ref must contain a ref (like #ref{@my_ref})")
-    }
-    return true
 }
 
 function tokenize(root: parse_node, tokens: token[], tokener: evomark_tokenizer, state: tokener_state) {
@@ -32,7 +36,7 @@ function tokenize(root: parse_node, tokens: token[], tokener: evomark_tokenizer,
     }
     let child = root.children[0]
     let ref_name = child.content
-    if(!ref_name){
+    if (!ref_name) {
         return
     }
     let [open, close] = get_tag_pair("Referring")
@@ -44,8 +48,8 @@ function tokenize(root: parse_node, tokens: token[], tokener: evomark_tokenizer,
         tokens.push(new token("text", ref_data.display_name))
         tokens.push(close)
     }
-    else{
-        push_warning("Name "+ref_name+" is not defined!", tokens)
+    else {
+        push_warning("Name " + ref_name + " is not defined!", tokens)
     }
 }
 

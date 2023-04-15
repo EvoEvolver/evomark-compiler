@@ -101,7 +101,12 @@ function stringify_core(root: parse_node, indent: number, res: string[], cl_pos:
                 break
             }
             case "sep": {
-                push_with_indent("\n", res, 0)
+                if(res[res.length-1]==="\n" && res[res.length-2]==="\n"){
+                    // Avoid adding too many lines
+                }
+                else{
+                    push_with_indent("\n", res, 0)
+                }
                 break
             }
             case "hidden_literal": {

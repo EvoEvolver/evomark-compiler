@@ -1,12 +1,13 @@
 import { evomark_core } from "../core"
 import { evomark_parser, parse_node, parse_rule_func, parse_state } from "../parse";
 import { evomark_tokenizer, get_tag_pair, token, tokener_state, tokenize_rule_func } from "../tokenize";
+import { simple_parser } from "./common";
 
 
-function parse(src: string, state: parse_state, param: any, parser: evomark_parser): boolean {
+function parse(src:string, state: parse_state, parser: evomark_parser){
     // Set the handle_ref of the func node
     state.curr_node.parent.meta["handle_ref"] = true
-    return parser.parse_core(src, state)
+    simple_parser(src, state, parser)
 }
 
 function tokenize(root: parse_node, tokens: token[], tokener: evomark_tokenizer, state: tokener_state) {

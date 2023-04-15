@@ -2,6 +2,7 @@
 
 import { parse_func, parse_func_body, parse_func_param } from "./parse_func"
 import { parse_ref } from "./parse_ref"
+import { simple_parser } from "./rules/common"
 
 
 export class evomark_parser {
@@ -14,7 +15,7 @@ export class evomark_parser {
 
     public constructor() {
         this.parse_rules_func = {}
-        this.add_func_rule(new parse_rule_func("box", parse_box))
+        this.add_func_rule(new parse_rule_func("box", simple_parser))
     }
 
     public add_func_rule(rule: parse_rule_func) {
@@ -31,7 +32,7 @@ export class evomark_parser {
         let content: string
 
         for (; i < state.end; i++) {
-            if ((/[#@]/).test(src[i])) {
+            if ((/[#@$%]/).test(src[i])) {
                 break
             }
             if ((/[\n]/).test(src[i])) {
@@ -127,6 +128,16 @@ export class evomark_parser {
         else {
             state.push_warning_node_to_root("\"@" + ref_name + " = \" must be followed with a function")
         }
+        return true
+    }
+
+    public parse_cmd_var(src: string, state: parse_state): boolean{
+        return true
+    }
+
+    public parse_cmd(src: string, state: parse_state): boolean{
+        
+
         return true
     }
 
@@ -295,7 +306,7 @@ export class parse_node {
     }
 }
 
-export type func_parser = (src: string, state: parse_state, param: any, parser: evomark_parser) => boolean
+export type func_parser = (src:string, state: parse_state, parser: evomark_parser) => void
 
 export class parse_rule_func {
     public parse: func_parser
@@ -304,8 +315,4 @@ export class parse_rule_func {
         this.name = name
         this.parse = parse
     }
-}
-
-function parse_box(src: string, state: parse_state, param: any, parser: evomark_parser): boolean {
-    return parser.parse_core(src, state)
 }

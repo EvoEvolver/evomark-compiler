@@ -3,10 +3,11 @@
 import { evomark_core } from "../core"
 import { evomark_parser, parse_node, parse_rule_func, parse_state } from "../parse";
 import { evomark_tokenizer, get_close_tag, get_closed_tag, get_open_tag, get_tag_pair, push_warning, token, tokenize_rule_func, tokener_state } from "../tokenize";
+import { simple_literal_parser, simple_parser } from "./common";
 
 
-function parse_slides(src: string, state: parse_state, param: any, parser: evomark_parser): boolean {
-    parser.parse_core(src, state)
+function parse_slides(src:string, state: parse_state, parser: evomark_parser){
+    simple_parser(src, state, parser)
     for (let child of state.curr_node.children) {
         if (child.type != "text") {
             if (child.type == "func" && child.content != "slide") {
@@ -14,7 +15,6 @@ function parse_slides(src: string, state: parse_state, param: any, parser: evoma
             }
         }
     }
-    return true
 }
 
 function tokenize_slides(root: parse_node, tokens: token[], tokener: evomark_tokenizer, state: tokener_state) {
@@ -54,10 +54,6 @@ function tokenize_slides(root: parse_node, tokens: token[], tokener: evomark_tok
     tokens.push(close)
 }
 
-function parse_slide(src: string, state: parse_state, param: any, parser: evomark_parser): boolean {
-    return parser.parse_core(src, state)
-}
-
 function tokenize_slide(root: parse_node, tokens: token[], tokener: evomark_tokenizer, state: tokener_state) {
     let [open, close] = get_tag_pair("Slide")
     tokens.push(open)
@@ -69,10 +65,6 @@ function tokenize_slide(root: parse_node, tokens: token[], tokener: evomark_toke
     tokens.push(close)
 }
 
-
-function parse_clk(src: string, state: parse_state, param: any, parser: evomark_parser): boolean {
-    return parser.parse_core(src, state)
-}
 
 function tokenize_clk(root: parse_node, tokens: token[], tokener: evomark_tokenizer, state: tokener_state) {
     if (!state.env["slide"]) {
@@ -108,11 +100,6 @@ function tokenize_clk(root: parse_node, tokens: token[], tokener: evomark_tokeni
 }
 
 
-function parse_voice(src: string, state: parse_state, param: any, parser: evomark_parser): boolean {
-    // TODO check whether the input is full text
-    return true
-}
-
 function tokenize_voice(root: parse_node, tokens: token[], tokener: evomark_tokenizer, state: tokener_state) {
     let tag = get_closed_tag("SlidesVoiceBox")
     for (let child of root.children) {
@@ -130,11 +117,11 @@ export function slides(core: evomark_core) {
 
     core.parser.add_func_rule(new parse_rule_func("slides", parse_slides))
     core.tokenizer.add_func_rule(new tokenize_rule_func("slides", tokenize_slides))
-    core.parser.add_func_rule(new parse_rule_func("slide", parse_slide))
+    core.parser.add_func_rule(new parse_rule_func("slide", simple_parser))
     core.tokenizer.add_func_rule(new tokenize_rule_func("slide", tokenize_slide))
-    core.parser.add_func_rule(new parse_rule_func("clk", parse_clk))
+    core.parser.add_func_rule(new parse_rule_func("clk", simple_parser))
     core.tokenizer.add_func_rule(new tokenize_rule_func("clk", tokenize_clk))
-    core.parser.add_func_rule(new parse_rule_func("voice", parse_voice))
+    core.parser.add_func_rule(new parse_rule_func("voice", simple_literal_parser))
     core.tokenizer.add_func_rule(new tokenize_rule_func("voice", tokenize_voice))
 
     core.register_modules("slides", {

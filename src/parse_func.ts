@@ -53,16 +53,16 @@ export function parse_func(src: string, state: parse_state, parser: evomark_pars
     let succ = parse_func_skeleton(src, state, parser)
     if(!succ)
         return false
-    // TODO look up func_name table
-    let func_name = state.curr_node.content
+
+    let func_node = state.curr_node
+    let func_name = func_node.content
     let rule = parser.parse_rules_func[func_name]
     if (!rule) {
         console.log("Cannot find rule name " + func_name)
         rule = parser.parse_rules_func["box"]
     }
-    parse_func_children(src, state, parser, rule)
-
-    state.curr_node = state.curr_node.parent
+    rule.parse(src, state, parser)
+    state.curr_node = func_node.parent
     return true
 }
 
@@ -124,20 +124,4 @@ export function parse_func_skeleton(src: string, state: parse_state, parser: evo
     }
     func_node.delim.push(state.pos)
     return true
-}
-
-function parse_func_children(src: string, state: parse_state, parser: evomark_parser, rule: parse_rule_func){
-    let param: any = null
-    for(let node of state.curr_node.children){
-        if (node.type == "func_param") {
-            param = node.content_obj
-        }
-        if (node.type == "func_body") {
-            let [body_start, body_end] = node.delim
-            let saved = state.set_local_state(body_start, body_start, body_end, node)
-            rule.parse(src, state, param, parser)
-            state.restore_state(saved)
-            param = null
-        }
-    }
 }
