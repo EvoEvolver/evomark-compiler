@@ -1,5 +1,5 @@
 import { evomark_core } from "../core"
-import { evomark_parser, parse_node, parse_rule_func, parse_state } from "../parse";
+import { evomark_parser, parse_node, func_rule, parse_state } from "../parse";
 import { evomark_tokenizer, get_close_tag, get_closed_tag, get_open_tag, get_tag_pair, push_warning, token, tokenize_rule_func, tokenize_box, tokener_state } from "../tokenize";
 import { simple_parser } from "./common";
 
@@ -39,7 +39,7 @@ function tokenize(root: parse_node, tokens: token[], tokener: evomark_tokenizer,
 
 export function figure(core: evomark_core){
 
-    core.parser.add_func_rule(new parse_rule_func("figure", simple_parser))
+    core.parser.add_func_rule(new func_rule("figure", simple_parser))
     core.tokenizer.add_func_rule(new tokenize_rule_func("figure", tokenize))
 
 }

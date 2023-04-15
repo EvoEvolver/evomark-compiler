@@ -1,4 +1,4 @@
-import { evomark_parser, func_parser, parse_rule_func } from "./parse"
+import { evomark_parser, func_parser, func_rule } from "./parse"
 import { evomark_tokenizer, func_tokenizer, tokener_state, tokenize_rule_func } from "./tokenize"
 
 
@@ -13,7 +13,7 @@ export class evomark_core {
     }
 
     public add_parse_rule(name: string, parse: func_parser) {
-        this.parser.add_func_rule(new parse_rule_func(name, parse))
+        this.parser.add_func_rule(new func_rule(name, parse))
 
     }
 
@@ -48,8 +48,7 @@ export class evomark_core {
         render_res.push(this.tokenizer.get_component_imports(tokener_state))
         render_res.push("</script>\n")
         render_res.push("<script>\n")
-        render_res.push(`export const documentProps = {title: '${tokener_state.config?.title || "Evomark project"}'}
-        `)
+        render_res.push(`export const documentProps = {title: '${tokener_state.config?.title || "Evomark project"}'}\n`)
         render_res.push("</script>\n")
         let config = tokener_state.config
 
@@ -69,9 +68,8 @@ function push_default_scripts(render_res: string[]) {
     render_res.push('provide("emconfig", emconfig)\n')
     render_res.push('import emctx from "@root/emctx.json"\n')
     render_res.push('provide("emctx", emctx)\n')
-    render_res.push('provide("pageContext", {description:"123"})\n')
     render_res.push('import Document from "@/Document.vue"\n')
     render_res.push('import Warning from "@/Warning.vue"\n')
 }
 
-export type func_rule = (core: evomark_core) => void
+export type generic_rule = (core: evomark_core) => void

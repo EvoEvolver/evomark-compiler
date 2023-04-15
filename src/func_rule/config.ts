@@ -1,5 +1,5 @@
 import { evomark_core } from "../core"
-import { evomark_parser, parse_node, parse_rule_func, parse_state } from "../parse";
+import { evomark_parser, parse_node, func_rule, parse_state } from "../parse";
 import { evomark_tokenizer, token, tokener_state, tokenize_rule_func } from "../tokenize";
 import { parse_dict } from "../utils/dict";
 import { from_body_wise_parse } from "./common";
@@ -31,7 +31,7 @@ export function make_config_rule(func_name: string, namespace: string) {
     }
     function config(core: evomark_core) {
         core.parser.init_state_config[namespace] = {}
-        core.parser.add_func_rule(new parse_rule_func(func_name, from_body_wise_parse(body_wise_parse)))
+        core.parser.add_func_rule(new func_rule(func_name, from_body_wise_parse(body_wise_parse)))
         core.tokenizer.add_func_rule(new tokenize_rule_func(func_name, tokenize))
     }
     return config

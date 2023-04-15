@@ -1,13 +1,13 @@
 import { evomark_core } from "./core"
-import { equ } from "./rules/equ"
-import { config, make_config_rule } from "./rules/config"
-import { list } from "./rules/list"
-import { figure } from "./rules/figure"
-import { slides } from "./rules/slides"
-import { ref } from "./rules/ref"
-import { section } from "./rules/sec"
-import { em } from "./rules/simple_rules"
-import { remark } from "./rules/remark"
+import { equ } from "./func_rule/equ"
+import { config, make_config_rule } from "./func_rule/config"
+import { list } from "./func_rule/list"
+import { figure } from "./func_rule/figure"
+import { slides } from "./func_rule/slides"
+import { ref } from "./func_rule/ref"
+import { section } from "./func_rule/sec"
+import { em } from "./func_rule/simple_rules"
+import { remark } from "./func_rule/remark"
 
 export function make_default_core(): evomark_core {
     let core = new evomark_core()

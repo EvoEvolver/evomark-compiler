@@ -13,10 +13,10 @@ export class evomark_tokenizer {
         return {}
     }
 
-    public tokenize_rules_func: Record<string, tokenize_rule_func>
+    public func_tokeners: Record<string, tokenize_rule_func>
 
     public constructor() {
-        this.tokenize_rules_func = {}
+        this.func_tokeners = {}
         this.add_func_rule(new tokenize_rule_func("box", tokenize_box))
         this.modules = {
             ref_def: {
@@ -26,9 +26,9 @@ export class evomark_tokenizer {
     }
 
     public add_func_rule(rule: tokenize_rule_func) {
-        if (rule.name in this.tokenize_rules_func)
+        if (rule.name in this.func_tokeners)
             throw Error("Trying to add a rule of the same name")
-        this.tokenize_rules_func[rule.name] = rule
+        this.func_tokeners[rule.name] = rule
     }
 
     public tokenize_core(root: parse_node, tokens: token[], state: tokener_state) {
@@ -42,11 +42,11 @@ export class evomark_tokenizer {
                 }
                 case "func": {
                     let func_name = node.content
-                    let rule = this.tokenize_rules_func[func_name]
+                    let rule = this.func_tokeners[func_name]
                     state.used_func[func_name] = ""
                     if (!rule) {
                         //throw Error("No tokenizer for function " + func_name)
-                        rule = this.tokenize_rules_func["box"]
+                        rule = this.func_tokeners["box"]
                         push_warning("No tokenizer for function " + func_name, tokens)
                     }
                     rule.tokenize(node, tokens, this, state)
@@ -71,6 +71,12 @@ export class evomark_tokenizer {
                         this.tokenize_core(node, tokens, state)
                     }
 
+                    break
+                }
+                case "var_assign": {
+                    break
+                }
+                case "var_use": {
                     break
                 }
                 case "sep": {

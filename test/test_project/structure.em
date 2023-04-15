@@ -14,4 +14,4 @@
 }
 
 Key idea: document as state
-Use $ to record to intermediate state
+Use to record to intermediate state

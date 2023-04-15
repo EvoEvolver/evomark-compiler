@@ -1,8 +1,6 @@
-import { evomark_parser, parse_identifier, parse_node, parse_rule_func, parse_state, valid_identifier_name_char } from "./parse"
+import { evomark_parser, parse_identifier, parse_node, func_rule, parse_state, valid_identifier_name_char } from "./parse"
 import { find_next_pairing_ignore_quote } from "./utils/parse"
 import { parse } from "relaxed-json"
-
-
 
 
 export function parse_func_param(src: string, state: parse_state): any {
@@ -49,31 +47,34 @@ export function parse_func_body(src: string, state: parse_state): parse_node {
     state.pos = next + 1
     return node
 }
+
 export function parse_func(src: string, state: parse_state, parser: evomark_parser): boolean {
-    let succ = parse_func_skeleton(src, state, parser)
+    let succ = parse_func_skeleton(src, state, parser, "#")
     if(!succ)
         return false
 
     let func_node = state.curr_node
     let func_name = func_node.content
-    let rule = parser.parse_rules_func[func_name]
+    let rule = parser.func_rules[func_name]
     if (!rule) {
         console.log("Cannot find rule name " + func_name)
-        rule = parser.parse_rules_func["box"]
+        rule = parser.func_rules["box"]
     }
     rule.parse(src, state, parser)
     state.curr_node = func_node.parent
     return true
 }
 
-export function parse_func_skeleton(src: string, state: parse_state, parser: evomark_parser): boolean {
+/**
+ * @param starter example: # or $
+ */
+export function parse_func_skeleton(src: string, state: parse_state, parser: evomark_parser, starter: string): boolean {
     let start = state.pos
-
     if (start == state.end - 1) {
         return false
     }
 
-    if (src[start] != "#" || !valid_identifier_name_char.test(src[start + 1])) {
+    if (src[start] != starter || !valid_identifier_name_char.test(src[start + 1])) {
         return false
     }
 
@@ -95,7 +96,7 @@ export function parse_func_skeleton(src: string, state: parse_state, parser: evo
             // Grammar sugar
             // Handle multi func like `#clk#box{}`
             // So that users don't write `#clk{#box{}}`
-            if (src[state.pos] == "#") {
+            if (src[state.pos] == starter) {
                 let all_param_node = true
                 for (let child of func_node.children) {
                     if (child.type != "func_param") {
@@ -109,7 +110,7 @@ export function parse_func_skeleton(src: string, state: parse_state, parser: evo
                 let fake_body_node = new parse_node("func_body")
                 let func_start_pos = state.pos
                 state.curr_node = fake_body_node
-                if (parse_func_skeleton(src, state, parser)) {
+                if (parse_func_skeleton(src, state, parser, starter)) {
                     let real_body_node = new parse_node("func_body")
                     real_body_node.delim = [func_start_pos, state.pos]
                     real_body_node.content = src.slice(func_start_pos, state.pos)

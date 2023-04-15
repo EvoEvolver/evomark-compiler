@@ -1,5 +1,5 @@
 import { evomark_core } from "../core"
-import { evomark_parser, is_valid_identifier, parse_identifier, parse_node, parse_rule_func, parse_state } from "../parse";
+import { evomark_parser, is_valid_identifier, parse_identifier, parse_node, func_rule, parse_state } from "../parse";
 import { parse_ref } from "../parse_ref";
 import { evomark_tokenizer, get_closed_tag, get_tag_pair, push_warning, token, tokenize_rule_func, tokener_state } from "../tokenize";
 
@@ -55,7 +55,7 @@ function tokenize(root: parse_node, tokens: token[], tokener: evomark_tokenizer,
 
 export function ref(core: evomark_core) {
 
-    core.parser.add_func_rule(new parse_rule_func("ref", parse))
+    core.parser.add_func_rule(new func_rule("ref", parse))
     core.tokenizer.add_func_rule(new tokenize_rule_func("ref", tokenize))
 
     core.register_modules("ref", {

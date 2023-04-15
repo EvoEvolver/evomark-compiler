@@ -1,5 +1,5 @@
 import { evomark_core } from "../core"
-import { evomark_parser, parse_node, parse_rule_func, parse_state } from "../parse";
+import { evomark_parser, parse_node, func_rule, parse_state } from "../parse";
 import { evomark_tokenizer, get_closed_tag, get_tag_pair, token, tokener_state, tokenize_rule_func } from "../tokenize";
 import { renderToString } from "katex"
 import { simple_literal_parser } from "./common";

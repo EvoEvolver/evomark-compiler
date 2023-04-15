@@ -1,7 +1,7 @@
 
 
 import { evomark_core } from "../core"
-import { evomark_parser, parse_node, parse_rule_func, parse_state } from "../parse";
+import { evomark_parser, parse_node, func_rule, parse_state } from "../parse";
 import { evomark_tokenizer, get_close_tag, get_closed_tag, get_open_tag, get_tag_pair, push_warning, token, tokenize_rule_func, tokener_state } from "../tokenize";
 import { simple_literal_parser, simple_parser } from "./common";
 
@@ -115,13 +115,13 @@ function tokenize_voice(root: parse_node, tokens: token[], tokener: evomark_toke
 
 export function slides(core: evomark_core) {
 
-    core.parser.add_func_rule(new parse_rule_func("slides", parse_slides))
+    core.parser.add_func_rule(new func_rule("slides", parse_slides))
     core.tokenizer.add_func_rule(new tokenize_rule_func("slides", tokenize_slides))
-    core.parser.add_func_rule(new parse_rule_func("slide", simple_parser))
+    core.parser.add_func_rule(new func_rule("slide", simple_parser))
     core.tokenizer.add_func_rule(new tokenize_rule_func("slide", tokenize_slide))
-    core.parser.add_func_rule(new parse_rule_func("clk", simple_parser))
+    core.parser.add_func_rule(new func_rule("clk", simple_parser))
     core.tokenizer.add_func_rule(new tokenize_rule_func("clk", tokenize_clk))
-    core.parser.add_func_rule(new parse_rule_func("voice", simple_literal_parser))
+    core.parser.add_func_rule(new func_rule("voice", simple_literal_parser))
     core.tokenizer.add_func_rule(new tokenize_rule_func("voice", tokenize_voice))
 
     core.register_modules("slides", {
