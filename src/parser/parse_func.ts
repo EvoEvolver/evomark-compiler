@@ -1,5 +1,5 @@
-import { evomark_parser, parse_identifier, parse_node, func_rule, parse_state, valid_identifier_name_char } from "./parse"
-import { find_next_pairing_ignore_quote } from "./utils/parse"
+import { evomark_parser, parse_identifier, parse_node, func_rule, parse_state, valid_identifier_name_char } from "../parse"
+import { find_next_pairing_ignore_quote } from "./utils"
 import { parse } from "relaxed-json"
 
 
@@ -43,7 +43,7 @@ export function parse_body(src: string, state: parse_state): parse_node {
     let param_src = src.slice(start + 1, next)
     let node = state.push_node("body")
     node.delim = [start + 1, next]
-    node.content = param_src
+    //node.content = param_src
     state.pos = next + 1
     return node
 }
@@ -116,7 +116,7 @@ export function get_parse_skeleton(env_type: string, starter: string) {
                     if (parse(src, state, parser)) {
                         let real_body_node = new parse_node(body_node_type)
                         real_body_node.delim = [func_start_pos, state.pos]
-                        real_body_node.content = src.slice(func_start_pos, state.pos)
+                        //real_body_node.content = src.slice(func_start_pos, state.pos)
                         func_node.add_child(real_body_node)
                         // state.pos will remain in the state after parsing the fake_body_node
                     }

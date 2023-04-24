@@ -39,7 +39,7 @@ export class evomark_core {
             emconfig = {}
         }
         let [root, parse_state] = this.parser.parse(src, emconfig)
-        console.log(root.write_tree())
+        
         let [tokens, tokener_state] = this.tokenizer.tokenize(root, parse_state)
         let render_res = ["<template>\n<Document>\n"]
         for (let token of tokens) {

@@ -1,7 +1,7 @@
 import { evomark_core } from "../core"
 import { evomark_parser, parse_node, func_rule, parse_state } from "../parse";
 import { evomark_tokenizer, get_tag_pair, token, tokener_state, tokenize_rule_func } from "../tokenize";
-import { simple_parser } from "./common";
+import { simple_parser } from "../parser/common";
 
 
 function parse(src:string, state: parse_state, parser: evomark_parser){

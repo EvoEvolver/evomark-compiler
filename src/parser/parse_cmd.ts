@@ -1,6 +1,6 @@
-import { evomark_parser, parse_identifier, parse_node, parse_state } from "./parse"
-import { get_parse_skeleton, parse_func_skeleton } from "./parse_func"
-import { find_next } from "./utils/parse"
+import { evomark_parser, parse_identifier, parse_node, parse_state } from "../parse"
+import { get_parse_skeleton, parse_func_skeleton } from "../parser/parse_func"
+import { find_next } from "./utils"
 
 export function parse_cmd_var_name(src: string, state: parse_state): string {
     let start = state.pos
@@ -12,17 +12,18 @@ export function parse_cmd_var_name(src: string, state: parse_state): string {
 
 
 export function parse_cmd_var(src: string, state: parse_state, parser: evomark_parser): boolean {
+    let var_start = state.pos
     let var_name = parse_cmd_var_name(src, state)
     if (!var_name)
         return false
-    let start = state.pos
+    let assign_start = state.pos
     let i = state.pos
-    let equal_pos = find_next(src, "=", " ", start, state.end)
+    let equal_pos = find_next(src, "=", " ", assign_start, state.end)
     if (equal_pos > 0) {
         // Case 1: There is a equal sign: var_assign node
         state.pos = equal_pos + 1
         if (parse_cmd_var_assign(src, state, parser, var_name)) {
-            state.curr_node.delim = [start, state.pos]
+            state.curr_node.delim = [assign_start, state.pos]
             state.curr_node = state.curr_node.parent
         }
     }
@@ -30,6 +31,7 @@ export function parse_cmd_var(src: string, state: parse_state, parser: evomark_p
         // Case 2: There is no equal sign: var_use node
         let node = state.push_node("var_use")
         node.content = var_name
+        node.delim = [var_start, assign_start]
     }
     return true
 }
@@ -46,7 +48,7 @@ export function parse_cmd_var_assign(src: string, state: parse_state, parser: ev
         if (cmd_node !== null) {
             // TODO
             var_node.content_obj["result"] = cmd_node.content_obj["result"]
-            console.log(var_node.content_obj["result"])
+            //console.log(var_node.content_obj["result"])
             state.cmd_exec_state.add_var(var_node)
         }
         state.curr_node = var_node

@@ -1,6 +1,5 @@
 import { evomark_core } from "../core"
 import { evomark_parser, is_valid_identifier, parse_identifier, parse_node, func_rule, parse_state } from "../parse";
-import { parse_ref } from "../parse_ref";
 import { evomark_tokenizer, get_closed_tag, get_tag_pair, push_warning, token, tokenize_rule_func, tokener_state } from "../tokenize";
 
 
@@ -17,7 +16,7 @@ function parse(src: string, state: parse_state, parser: evomark_parser) {
         let ref_name = content.slice(1)
         if (is_valid_identifier(ref_name)) {
             node.content = ref_name
-            let child_node = node.add_child(new parse_node("hidden_literal"))
+            let child_node = node.add_child(new parse_node("literal"))
             child_node.content = content
             child_node.delim = node.delim
         }

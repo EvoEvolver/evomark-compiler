@@ -10,7 +10,7 @@ function parse(src: string, state: parse_state, parser: evomark_parser) {
             param = node.content_obj
         }
         if (node.type == "cmd_body") {
-            let literal_node = node.add_child(new parse_node("hidden_literal"))
+            let literal_node = node.add_child(new parse_node("literal"))
             let content = src.slice(node.delim[0], node.delim[1]).trim()
             literal_node.content = content
             state.cmd_exec_state.add_cache(param, content)

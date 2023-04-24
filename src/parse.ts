@@ -1,10 +1,10 @@
 
 
-import { parse_cmd, parse_cmd_var } from "./parse_cmd"
-import { parse_func } from "./parse_func"
-import { parse_ref_assign } from "./parse_ref"
-import { parse_text } from "./parse_text"
-import { simple_parser } from "./func_rule/common"
+import { parse_cmd, parse_cmd_var } from "./parser/parse_cmd"
+import { parse_func } from "./parser/parse_func"
+import { parse_ref_assign } from "./parser/parse_ref"
+import { parse_text } from "./parser/parse_text"
+import { simple_parser } from "./parser/common"
 import { cmd_exec_state } from "./cmd_exec"
 
 
@@ -38,24 +38,7 @@ export class evomark_parser {
     public parse_core(src: string, state: parse_state): boolean {
         while (state.pos != state.end) {
             // Merge multiple \n
-            if (src[state.pos] == "\n") {
-                let n_newline = 0
-                let i = state.pos
-                for (; i < state.end; i++) {
-                    if (!(/[\s\n]/.test(src[i]))) {
-                        break
-                    }
-                    else {
-                        if (src[i] == "\n")
-                            n_newline++
-                    }
-                }
-                // Add a new line
-                if (n_newline >= 2)
-                    state.push_node("sep")
-                state.pos = i
-                continue
-            }
+            parse_sep(src, state, this)
             // Try rules
             if (parse_text(src, state, this))
                 continue
@@ -67,6 +50,8 @@ export class evomark_parser {
                 continue
             if (parse_cmd(src, state, this))
                 continue
+            if (state.pos == state.end)
+                break
             console.log("There is no available rules. Abort.")
             return false
         }
@@ -81,6 +66,26 @@ export class evomark_parser {
     }
 }
 
+export function parse_sep(src: string, state: parse_state, parser: evomark_parser): void {
+    if (src[state.pos] != "\n")
+        return
+    let n_newline = 0
+    let i = state.pos
+    for (; i < state.end; i++) {
+        if (!(/[\s\n]/.test(src[i]))) {
+            break
+        }
+        else {
+            if (src[i] == "\n")
+                n_newline++
+        }
+    }
+    // Add a new line
+    if (n_newline >= 2)
+        state.push_node("sep")
+    state.pos = i
+
+}
 
 export var valid_identifier_name_char = /[a-zA-Z0-9._]/
 

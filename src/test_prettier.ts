@@ -4,10 +4,13 @@ import * as fs from 'fs'
 import { evomark_core } from "./core"
 import { make_default_core } from "./default"
 let parser = new evomark_parser()
-let src: string = fs.readFileSync("../test/cmd.em", { encoding: 'utf8' })
+var args = process.argv.slice(2);
+let file_path = args[0]
+let src: string = fs.readFileSync(file_path, { encoding: 'utf8' })
 let core = make_default_core()
 let [root, parse_state] = core.parser.parse(src, null)
 
+console.log(root.write_tree())
 
 //console.log(root)
 function get_indent(indent: number): string {
@@ -59,7 +62,7 @@ function stringify_core(root: parse_node, indent: number, res: string[], cl_pos:
             case "cmd":
             case "func": {
                 let starter = "#"
-                if(node.type == "cmd") starter = "$"
+                if (node.type == "cmd") starter = "$"
                 push_with_indent(starter + node.content, res, indent)
                 stringify_core(node, indent, res, cl_pos)
                 if (new_line_between_pos(node.delim[1], root.children[i + 1]?.delim[0], cl_pos)) {
@@ -103,6 +106,10 @@ function stringify_core(root: parse_node, indent: number, res: string[], cl_pos:
                 stringify_core(node, indent, res, cl_pos)
                 break
             }
+            case "var_use": {
+                push_with_indent("%" + node.content, res, 0)
+                break
+            }
             case "text": {
                 push_with_indent(node.content, res, indent)
                 if (new_line_between_pos(node.delim[1], root.children[i + 1]?.delim[0], cl_pos)) {
@@ -111,21 +118,25 @@ function stringify_core(root: parse_node, indent: number, res: string[], cl_pos:
                 break
             }
             case "sep": {
-                if(res[res.length-1]==="\n" && res[res.length-2]==="\n"){
+                if (res[res.length - 1] === "\n" && res[res.length - 2] === "\n") {
                     // Avoid adding too many lines
                 }
-                else{
+                else {
                     push_with_indent("\n", res, 0)
                 }
                 break
             }
-            case "hidden_literal": {
+            case "literal": {
                 let splitted = node.content.split("\n")
-                for (let j = 0; j < splitted.length - 1; j++) {
-                    push_with_indent(splitted[j].trim(), res, indent)
-                    push_with_indent("\n", res, indent)
+                for (let j = 0; j < splitted.length; j++) {
+                    let content = splitted[j].trim()
+                    if (content.length == 0)
+                        continue
+                    push_with_indent(content, res, indent)
+                    if (j != splitted.length - 1)
+                        push_with_indent("\n", res, 0)
                 }
-                push_with_indent(splitted[splitted.length - 1].trim(), res, indent)
+                //push_with_indent(splitted[splitted.length - 1].trim(), res, indent)
                 let next_start = get_next_start(root, i)
                 if (new_line_between_pos(node.delim[1], next_start, cl_pos)) {
                     push_with_indent("\n", res, 0)

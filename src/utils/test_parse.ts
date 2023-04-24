@@ -1,6 +1,6 @@
 
 
-import * as index from "./parse"
+import * as index from "../parser/utils"
 
 
 

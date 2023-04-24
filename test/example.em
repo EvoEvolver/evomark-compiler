@@ -18,9 +18,21 @@ title5 = "Hello world"
 
 See #ref{@asds} for detail. 
 
+123 #equ{123} 123
+
+%a = $def{
+    Hello
+}
 
 #equ{
     \ket{\phi}
 }
 
+%a = $def{
+    Hello
+}
+
+%b = $def{
+    Hello %a
+}
 

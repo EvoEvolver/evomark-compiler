@@ -72,7 +72,7 @@ export function insert_cache(curr_node: parse_node, input_hash: string, result: 
             let body_node = cache_node.push_child("cmd_body")
             param_node.content_obj = input_hash
             body_node.content = result
-            let literal = body_node.push_child("hidden_literal")
+            let literal = body_node.push_child("literal")
             literal.content = result
             parent.children.splice(parent.children.length-1, 0 ,cache_node)
             return cache_node

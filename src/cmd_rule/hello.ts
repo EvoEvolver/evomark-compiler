@@ -7,7 +7,7 @@ import { hash } from "spark-md5"
 function parse(src: string, state: parse_state, parser: evomark_parser) {
     for (let node of state.curr_node.children) {
         if (node.type == "cmd_body") {
-            let literal_node = node.add_child(new parse_node("hidden_literal"))
+            let literal_node = node.add_child(new parse_node("literal"))
             let content = src.slice(node.delim[0], node.delim[1]).trim()
             literal_node.content = content
             let input = resolve_text(content, state)

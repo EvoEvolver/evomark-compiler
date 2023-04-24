@@ -1,6 +1,6 @@
-import { evomark_parser, parse_identifier, parse_state } from "./parse";
+import { evomark_parser, parse_identifier, parse_state } from "../parse";
 import { parse_func } from "./parse_func";
-import { find_next } from "./utils/parse";
+import { find_next } from "./utils";
 
 
 export function parse_ref(src: string, state: parse_state): string {

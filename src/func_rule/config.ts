@@ -2,7 +2,7 @@ import { evomark_core } from "../core"
 import { evomark_parser, parse_node, func_rule, parse_state } from "../parse";
 import { evomark_tokenizer, token, tokener_state, tokenize_rule_func } from "../tokenize";
 import { parse_dict } from "../utils/dict";
-import { from_body_wise_parse } from "./common";
+import { from_body_wise_parse } from "../parser/common";
 
 export function make_config_rule(func_name: string, namespace: string) {
     function body_wise_parse(src: string, state: parse_state, param: any, parser: evomark_parser): boolean {
@@ -13,12 +13,12 @@ export function make_config_rule(func_name: string, namespace: string) {
         else if (param !== null) {
             lang = param["lang"]
         }
-        let config_src = state.curr_node.content
+        let config_src = state.slice_range(src)
         if (lang == "string")
             config_src = ["{", config_src, "}"].join("\n")
         let config_dict = parse_dict(config_src, lang, state)
         if (config_dict) {
-            let node = state.push_node("hidden_literal")
+            let node = state.push_node("literal")
             node.content = config_src.trim()
             //node.content_obj = config_dict
             state.assign_to_config(config_dict, namespace)
