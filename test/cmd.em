@@ -8,13 +8,21 @@
 }
 
 %h = $hello{
-  a
+  %a
+
+  
 }
 
-$cache{%h}("be5b4c12350d31df9b4d1e64b39fff57"){Hello! a}
-$cache{%h}("be5b4c12350d31df9b4d1e66b39fff57"){Hello! a}
+$cache{%h}("e173e4a1fe31a2c41ee8d4cd414a9818"){Hello! hello  is hello 
+hello  is not hello
+
+}
+
 $show{%h}
 $t{
-  Hello! a  
+  Hello! hello  is hello 
+hello  is not hello 
+
+ 
 }
 

@@ -146,7 +146,7 @@ export class obj_host {
     // Content for lazy obj
     public input_hash = null
     public input: any = null
-    public eval: (input: any) => any = null
+    public eval_func: (input: any) => any = null
     private _content: any = "<Undef>"
     public dependency: obj_host[] = []
     public content(): any {

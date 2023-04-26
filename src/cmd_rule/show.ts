@@ -1,8 +1,8 @@
 import { evomark_core } from "../core"
 import { exec_state, obj_host } from "../exec/exec";
-import { parse_node, func_rule, parse_state, valid_identifier_name_char } from "../parse";
+import { parse_node, func_rule } from "../parse";
 import { simple_literal_parser } from "../parser/common";
-import { store_literal_to_host } from "./common";
+import { get_first_body_node, store_literal_to_host } from "./common";
 
 
 
@@ -11,7 +11,8 @@ function exec(cmd_node: parse_node, state: exec_state, assigned: obj_host) {
     if (assigned != null)
         throw Error("illegal")
     let host = new obj_host()
-    store_literal_to_host(cmd_node, state, host)
+    let cmd_body = get_first_body_node(cmd_node)
+    store_literal_to_host(cmd_body, state, host)
 
     let sibling = cmd_node.get_next_non_sep_sibling()
 

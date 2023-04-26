@@ -49,7 +49,7 @@ function exec(cmd_node: parse_node, state: exec_state, assigned: obj_host) {
             // So we limit the number of in-doc cache for each variable to be one
 
             state.save_cache(host.input_hash, in_doc_cached_content)
-
+            host.set_content(in_doc_cached_content)
         }
         else {
             // This is a empty body. We fill it for the users
