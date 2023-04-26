@@ -13,6 +13,7 @@ import { hello } from "./cmd_rule/hello"
 import { cache } from "./cmd_rule/cache"
 import { show } from "./cmd_rule/show"
 import { t } from "./cmd_rule/t"
+import { lm } from "./cmd_rule/lm"
 
 export function make_default_core(): evomark_core {
     let core = new evomark_core()
@@ -34,6 +35,7 @@ export function make_default_core(): evomark_core {
     hello(core)
     cache(core)
     t(core)
+    lm(core)
     
     return core
 }

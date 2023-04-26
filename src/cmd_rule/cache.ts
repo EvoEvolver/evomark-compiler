@@ -59,7 +59,10 @@ function exec(cmd_node: parse_node, state: exec_state, assigned: obj_host) {
                 // Or the cache is an empty string
                 return
             cache_content_node.children = []
-            cache_content_node.add_child(new parse_node("literal")).set_content(cached_res)
+            let cache_literal = cache_content_node.add_child(new parse_node("literal")).set_content(cached_res)
+            cache_content_node.typesetting_type = "block"
+            if (typeof cached_res === "string" && cached_res.indexOf("\n") < 0)
+                cache_content_node.typesetting_type = "inline"
         }
         return
     }

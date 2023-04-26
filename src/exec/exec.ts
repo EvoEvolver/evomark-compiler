@@ -81,7 +81,7 @@ export class evomark_exec {
                 case "cmd": {
                     let rule = this.exec_rules[cmd.content]
                     if (!rule)
-                        throw Error("Cannot find rule " + cmd.children[0].content)
+                        throw Error("Cannot find rule " + cmd.content)
                     rule(cmd, state, null)
                     break
                 }
@@ -147,7 +147,7 @@ export class obj_host {
     public input_hash = null
     public input: any = null
     public eval_func: (input: any) => any = null
-    private _content: any = "<Undef>"
+    private _content: any = "*Undef*"
     public dependency: obj_host[] = []
     public content(): any {
         return this._content

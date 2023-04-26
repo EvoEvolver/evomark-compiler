@@ -12,7 +12,10 @@ let [root, parse_state] = core.parser.parse(src, null)
 console.log(root.write_tree())
 let cache_table: any
 if (fs.existsSync(file_path + ".cache.json")) {
-    cache_table = JSON.parse(fs.readFileSync(file_path + ".cache.json", { encoding: 'utf8' }))
+    let json_raw = fs.readFileSync(file_path + ".cache.json", { encoding: 'utf8' })
+    if (json_raw.trim().length == 0)
+        json_raw = "{}"
+    cache_table = JSON.parse(json_raw)
 }
 else {
     cache_table = null

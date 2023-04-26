@@ -1,4 +1,5 @@
 import { evomark_parser, parse_state } from "../parse"
+import { normalize_text } from "../utils/normalize"
 import { parse_cmd, parse_cmd_var } from "./parse_cmd"
 
 function parse_newline(src: string, state: parse_state) {
@@ -57,19 +58,19 @@ export function parse_literal(src: string, state: parse_state, parser: evomark_p
     if (content.length == 0)
         throw Error("bug found")
 
-    let trimed = content.trim()
-    if (trimed.length == 0 && n_new_line_after == 0 && n_new_line_before == 0)
+    let normalized = normalize_text(content)
+    if (normalized.length == 0 && n_new_line_after == 0 && n_new_line_before == 0)
         return true
-    if (trimed.length == 0 && n_new_line_before == 1)
+    if (normalized.length == 0 && n_new_line_before == 1)
         n_new_line_before = 1
     if (n_new_line_before != 0) {
         let sep_node = state.push_node("sep")
         sep_node.content_obj = n_new_line_before
     }
-    if (trimed.length != 0) {
+    if (normalized.length != 0) {
         let node = state.push_node("literal")
         node.delim = [start, i]
-        node.content = trimed
+        node.content = normalized
     }
     if (i == state.end) {
         if (n_new_line_after == 1)

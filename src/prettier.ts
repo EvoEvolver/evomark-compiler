@@ -14,6 +14,15 @@ function push_with_indent(content: string, res: string[], indent: number) {
     res.push("  ".repeat(indent) + content)
 }
 
+function push_multi_line_literal(content: string, res: string[], indent: number) {
+    let splitted = content.split("\n")
+    push_with_indent(splitted[0], res, 0)
+    for (let i = 1; i < splitted.length; i++) {
+        res.push("\n")
+        push_with_indent(splitted[i], res, indent)
+    }
+}
+
 function new_line_between_pos(pos1: number, pos2: number, cl_pos: number[]): boolean {
     if (pos2 === undefined)
         return false
@@ -125,7 +134,7 @@ function stringify_core(root: parse_node, indent: number, res: string[], cl_pos:
             case "literal": {
                 if (node.content != "") {
                     add_space_for_inline(res)
-                    push_with_indent(node.content, res, 0)
+                    push_multi_line_literal(node.content, res, indent)
                 }
                 break
             }

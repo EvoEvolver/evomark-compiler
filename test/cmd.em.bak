@@ -1,28 +1,15 @@
-%b = $def{
-  hello
+%a = $hello{
+My name is Zijian! What is your name? Answer:
 }
 
-%a = $def{
-  %b is hello
-  %b is not hello
-}
-
-%h = $hello{
-  %a
-
-  
-}
-
-$cache{%h}("e173e4a1fe31a2c41ee8d4cd414a9818"){Hello! hello  is hello 
-hello  is not hello  
-
-}
-
-$show{%h}
+$show{%a}
 $t{
-  Hello! hello  is hello 
-hello  is not hello  
-
- 
+  Hello! My name is Zijian! What is your name? Answer:
 }
 
+%res = $lm{%a}
+
+$show{%res}
+$t{
+  Hello, my name is [name].
+}

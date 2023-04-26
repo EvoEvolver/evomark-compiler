@@ -1,6 +1,6 @@
-import { cmd_exec_state } from "../cmd_exec"
 import { exec_state, get_hash, host_type, obj_host } from "../exec/exec"
-import { parse_node, parse_state, valid_identifier_name_char } from "../parse"
+import { parse_node } from "../parse"
+import { normalize_text } from "../utils/normalize"
 
 
 export function get_pure_literal(cmd_body: parse_node): string {
@@ -16,7 +16,7 @@ export function get_pure_literal(cmd_body: parse_node): string {
             throw Error("illegle")
         }
     }
-    return res.join("")
+    return normalize_text(res.join(""))
 }
 
 export function get_first_body_node(cmd_node: parse_node) {
@@ -54,13 +54,13 @@ export function store_literal_to_host(cmd_body: parse_node, state: exec_state, h
             let var_host = var_uses[i_var]
             if (var_host != null) {
                 let content = var_host.content()
-                if (content == "<Undef>" && var_host.type == host_type.Lazy) {
+                if (content == "*Undef*" && var_host.type == host_type.Lazy) {
                     content = eval_and_cache(var_host, state.cache_table)
                 }
                 res.push(content + " ")
             }
             else
-                res.push("<Error>")
+                res.push("*Error*")
             i_var++
         }
         else if (node.type == "literal") {
@@ -71,7 +71,7 @@ export function store_literal_to_host(cmd_body: parse_node, state: exec_state, h
         }
     }
     host.dependency = var_uses
-    host.set_content(res.join(""))
+    host.set_content(normalize_text(res.join("")))
     if (has_undef) {
         host.type = host_type.Undef
     }

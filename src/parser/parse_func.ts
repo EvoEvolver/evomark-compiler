@@ -34,26 +34,35 @@ export function parse_param(src: string, state: parse_state): parse_node {
 export function parse_body(src: string, state: parse_state): parse_node {
     let start = state.pos
     // Trim white space
-    while("\n ".indexOf(src[start]) > -1)
+    while ("\n ".indexOf(src[start]) > -1)
         start++
     if (src[start] != "{")
         return null
-    start ++
+    start++
     // Trim white space
-    while(src[start] == " "){
-        start ++
+    while (src[start] == " ") {
+        start++
     }
     // Check whether this is a multiple line body
     let contain_newline = false
-    if(src[start] == "\n"){
-        start ++
+    if (src[start] == "\n") {
+        start++
         contain_newline = true
     }
     let next = find_next_pairing_ignore_quote("{", "}", src, start)
     if (next == -1)
         return null
+    let end = next - 1
+    for (; end > start; end--) {
+        if(src[end]==" ")
+            continue
+        if(src[end]=="\n")
+            break
+        end ++
+        break
+    }
     let node = state.push_node("body")
-    node.delim = [start, next]
+    node.delim = [start, end]
     node.typesetting_type = contain_newline ? "block" : "inline"
     state.pos = next + 1
     return node
@@ -143,8 +152,3 @@ export function get_parse_skeleton(env_type: string, starter: string) {
     }
     return parse
 }
-
-
-//export class body_node extends parse_node{
-    
-//}
