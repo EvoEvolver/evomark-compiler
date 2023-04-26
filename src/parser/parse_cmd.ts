@@ -37,8 +37,8 @@ export function parse_cmd_var(src: string, state: parse_state, parser: evomark_p
 }
 
 export function parse_cmd_var_assign(src: string, state: parse_state, parser: evomark_parser, var_name: string): boolean {
-    let i = state.pos
-    let cmd_pos = find_next(src, "$", " \n", i, state.end)
+    let start = state.pos
+    let cmd_pos = find_next(src, "$", " \n", start, state.end)
     if (cmd_pos > -1) {
         state.pos = cmd_pos
         let var_node = state.push_node("var_assign")
@@ -46,11 +46,15 @@ export function parse_cmd_var_assign(src: string, state: parse_state, parser: ev
         state.curr_node = var_node
         let cmd_node = parse_cmd(src, state, parser)
         if (cmd_node !== null) {
-            // TODO
-            var_node.content_obj["result"] = cmd_node.content_obj["result"]
+            // We handle this in the exec phase
+            //var_node.content_obj["result"] = cmd_node.content_obj["result"]
             //console.log(var_node.content_obj["result"])
-            state.cmd_exec_state.add_var(var_node)
+            //state.cmd_exec_state.add_var(var_node)
         }
+        if(src.slice(start, cmd_pos).indexOf("\n")<0)
+            var_node.typesetting_type = "one_line"
+        else
+            var_node.typesetting_type = "two_line"
         state.curr_node = var_node
         return true
     }

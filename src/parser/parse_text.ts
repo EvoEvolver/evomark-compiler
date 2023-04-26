@@ -1,87 +1,97 @@
 import { evomark_parser, parse_state } from "../parse"
 import { parse_cmd, parse_cmd_var } from "./parse_cmd"
 
-export function parse_text(src: string, state: parse_state, parser: evomark_parser): boolean {
-    let start = state.pos
+function parse_newline(src: string, state: parse_state) {
 
-    let i = start
-    let change_line_break = false
+}
 
-    for (; i < state.end; i++) {
-        if ((/[#@$%]/).test(src[i])) {
-            break
-        }
-        if ((/[\n]/).test(src[i])) {
-            /*
+const cmd_breaking = /[$%]/
 
-            */
-            if (i + 1 < state.end && (/[\n]/).test(src[i + 1])) {
-                change_line_break = true
-                break
-            }
-        }
-    }
+export function parse_cmd_breaking_literal(src: string, state: parse_state, parser: evomark_parser): boolean {
+    return parse_literal(src, state, parser, cmd_breaking)
+}
 
-    let succ = i != start
-    if (succ) {
-        let content = src.slice(start, i)
-        if (content.length != 0) {
-            let node = state.push_node("text")
-            node.delim = [start, i]
-            let trimed = content.replace(/^[ \t]+|[ \t]+$/g, '')
-            if (trimed[trimed.length - 1] != "\n")
-                trimed = trimed + " "
-            if (content[0] == " ")
-                trimed = " " + trimed
-            node.content = trimed
-        }
-        state.pos = i
-    }
-    return succ
+const normal_breaking = /[$%#@]/
+
+export function parse_normal_breaking_literal(src: string, state: parse_state, parser: evomark_parser): boolean {
+    return parse_literal(src, state, parser, normal_breaking)
 }
 
 // Space insensitive literal
-export function parse_literal(src: string, state: parse_state, parser: evomark_parser): boolean {
+export function parse_literal(src: string, state: parse_state, parser: evomark_parser, breaker: RegExp): boolean {
     let start = state.pos
-    let i = start
 
+    let i = start
+    let n_new_line_before = 0
+    let n_new_line_after = 0
+    let before_non_empty = true
     for (; i < state.end; i++) {
-        if ((/[$%]/).test(src[i])) {
+        if (breaker.test(src[i])) {
             break
         }
+        if ((/[\n]/).test(src[i])) {
+            if (before_non_empty)
+                n_new_line_before++
+            else
+                n_new_line_after++
+            continue
+        }
+        if (src[i] == " ")
+            continue
+        // This part is reached only when a non blank character is found
+        n_new_line_after = 0 // Reset the count
+        before_non_empty = false
     }
 
     let succ = i != start
-    if (succ) {
-        let content = src.slice(start, i)
-        if (content.length != 0) {
-            //let trimed = content.replace(/^[ \n]+|[ \t]+$/g, '')
-            let trimed = content.trim()
-            let string_start = content.indexOf(trimed[0])
-            let string_end = content.lastIndexOf(trimed[trimed.length-1])
-            ///if (trimed[trimed.length - 1] != "\n")
-            //    trimed = trimed + " "
-            //if (content[0] == " ")
-            //    trimed = " " + trimed
-            if (trimed != "") {
-                let node = state.push_node("literal")
-                node.delim = [start+string_start, start+string_end+1]
-                node.content = trimed
-            }
-        }
-        state.pos = i
+    if (!succ)
+        return false
+
+    if (n_new_line_before > 2)
+        n_new_line_before = 2
+    if (n_new_line_after > 2)
+        n_new_line_after = 2
+
+    let content = src.slice(start, i)
+    state.pos = i
+    if (content.length == 0)
+        throw Error("bug found")
+
+    let trimed = content.trim()
+    if (trimed.length == 0 && n_new_line_after == 0 && n_new_line_before == 0)
+        return true
+    if (trimed.length == 0 && n_new_line_before == 1)
+        n_new_line_before = 1
+    if (n_new_line_before != 0) {
+        let sep_node = state.push_node("sep")
+        sep_node.content_obj = n_new_line_before
     }
-    return succ
+    if (trimed.length != 0) {
+        let node = state.push_node("literal")
+        node.delim = [start, i]
+        node.content = trimed
+    }
+    if (i == state.end) {
+        if (n_new_line_after == 1)
+            n_new_line_after = 0
+    }
+
+    if (n_new_line_after != 0) {
+        let sep_node = state.push_node("sep")
+        sep_node.content_obj = n_new_line_after
+    }
+
+    return true
 
 }
 
 export function parse_literal_with_cmd(src: string, state: parse_state, parser: evomark_parser) {
     while (state.pos != state.end) {
-        if (parse_literal(src, state, this))
+        if (parse_cmd_breaking_literal(src, state, parser))
             continue
-        if (parse_cmd_var(src, state, this))
+        if (parse_cmd_var(src, state, parser))
             continue
-        if (parse_cmd(src, state, this))
+        if (parse_cmd(src, state, parser))
             continue
         console.log("There is no available rules. Abort.")
         return false

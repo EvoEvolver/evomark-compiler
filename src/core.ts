@@ -1,3 +1,4 @@
+import { evomark_exec } from "./exec/exec"
 import { cmd_rule, evomark_parser, func_parser, func_rule } from "./parse"
 import { evomark_tokenizer, func_tokenizer, tokener_state, tokenize_rule_func } from "./tokenize"
 
@@ -6,10 +7,16 @@ export class evomark_core {
 
     public parser: evomark_parser
     public tokenizer: evomark_tokenizer
+    public executor: evomark_exec
 
     public constructor() {
         this.parser = new evomark_parser()
         this.tokenizer = new evomark_tokenizer()
+        this.executor = new evomark_exec()
+    }
+
+    public add_exec_rule(name: string, func) {
+        this.executor.add_rule(name, func)
     }
 
     public add_parse_func(name: string, parse: func_parser) {

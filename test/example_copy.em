@@ -1,8 +1,8 @@
 
-
 %a = $def{1}
-$use_cache{%a}
-$show{%a}
 
+#equ{1}
 
-#box#equ{1 %a}
+#box#equ{
+    1 %a
+}

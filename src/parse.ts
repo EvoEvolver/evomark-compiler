@@ -3,7 +3,7 @@
 import { parse_cmd, parse_cmd_var } from "./parser/parse_cmd"
 import { parse_func } from "./parser/parse_func"
 import { parse_ref_assign } from "./parser/parse_ref"
-import { parse_text } from "./parser/parse_text"
+import { parse_normal_breaking_literal } from "./parser/parse_text"
 import { simple_parser } from "./parser/common"
 import { cmd_exec_state } from "./cmd_exec"
 
@@ -38,9 +38,9 @@ export class evomark_parser {
     public parse_core(src: string, state: parse_state): boolean {
         while (state.pos != state.end) {
             // Merge multiple \n
-            parse_sep(src, state, this)
+            //parse_sep(src, state, this)
             // Try rules
-            if (parse_text(src, state, this))
+            if (parse_normal_breaking_literal(src, state, this))
                 continue
             if (parse_func(src, state, this))
                 continue
@@ -173,12 +173,14 @@ export class parse_state {
 export class parse_node {
     public children: parse_node[] = []
     public parent: parse_node
-    public namespaec: string = ""
+    public namespace: string = ""
+    public typesetting_type = ""
     public delim: number[] = [-1, -1]
     public type: string
     public content: string = ""
-    public content_obj: any = {}
+    public content_obj: any = null
     public meta: any = {}
+    public is_garbage = false
     public constructor(type: string) {
         this.type = type
     }
@@ -196,6 +198,14 @@ export class parse_node {
         }
         return res.join("")
     }
+    public set_content(content: string): parse_node {
+        this.content = content
+        return this
+    }
+    public set_content_obj(content_obj: any): parse_node {
+        this.content_obj = content_obj
+        return this
+    }
     public write_tree(): string {
         return this.write_tree_with_level(0)
     }
@@ -207,6 +217,26 @@ export class parse_node {
     public add_child(node: parse_node): parse_node {
         this.children.push(node)
         node.parent = this
+        return node
+    }
+    public get_self_index() {
+        let parent = this.parent
+        return parent.children.findIndex((x) => x == this)
+    }
+    public get_next_non_sep_sibling() {
+        let self_index = this.get_self_index()
+        for (let i = self_index + 1; i < this.parent.children.length; i++) {
+            if (this.parent.children[i].type == "sep")
+                continue
+            else
+                return this.parent.children[i]
+        }
+        return null
+    }
+    public add_sibling(node: parse_node): parse_node {
+        let self_index = this.get_self_index()
+        this.parent.children.splice(self_index + 1, 0, node)
+        node.parent = this.parent
         return node
     }
 }

@@ -1,27 +1,41 @@
 import { evomark_core } from "../core"
-import { evomark_parser, parse_node, func_rule, parse_state, valid_identifier_name_char } from "../parse";
-import { insert_cache, resolve_text } from "./common";
-import { hash } from "spark-md5"
+import { exec_state, get_hash, host_type, obj_host } from "../exec/exec";
+import { parse_node, func_rule } from "../parse";
+import { simple_literal_parser } from "../parser/common";
+import { store_literal_to_host } from "./common";
 
 
-function parse(src: string, state: parse_state, parser: evomark_parser) {
-    for (let node of state.curr_node.children) {
-        if (node.type == "cmd_body") {
-            let literal_node = node.add_child(new parse_node("literal"))
-            let content = src.slice(node.delim[0], node.delim[1]).trim()
-            literal_node.content = content
-            let input = resolve_text(content, state)
-            let input_hash = hash(input)
-            let result = state.cmd_exec_state.read_cache(input_hash)
-            if(!result){
-                result = "hello "+input
-                insert_cache(state.curr_node, input_hash, result)
-            }
-            break
-        }
+// Let's imagine this is a very heavy task
+function query_hello(input: string): string {
+    return "Hello! " + input
+}
+
+function exec(cmd_node: parse_node, state: exec_state, assigned: obj_host) {
+    if (assigned == null)
+        return
+    let host = new obj_host()
+    store_literal_to_host(cmd_node, state, host)
+    if (host.type == host_type.Undef) {
+        assigned.type = host_type.Undef
+        return
+    }
+    let input = host.content()
+    let input_hash = get_hash(input, "hello")
+    let sibling = cmd_node.parent.get_next_non_sep_sibling()
+    let cache_in_table = state.read_cache(input_hash)
+    assigned.dependency = host.dependency
+    assigned.input_hash = input_hash
+    assigned.type = host_type.Lazy
+    if(cache_in_table){
+        assigned.set_content(cache_in_table)
+    }
+    else{
+        assigned.input = input
+        assigned.eval = query_hello
     }
 }
 
 export function hello(core: evomark_core) {
-    core.parser.add_cmd_rule(new func_rule("hello", parse))
+    core.parser.add_cmd_rule(new func_rule("hello", simple_literal_parser))
+    core.add_exec_rule("hello", exec)
 }

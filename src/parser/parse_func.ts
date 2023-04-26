@@ -33,17 +33,28 @@ export function parse_param(src: string, state: parse_state): parse_node {
 
 export function parse_body(src: string, state: parse_state): parse_node {
     let start = state.pos
-    if (src[start] == "\n")
+    // Trim white space
+    while("\n ".indexOf(src[start]) > -1)
         start++
     if (src[start] != "{")
         return null
-    let next = find_next_pairing_ignore_quote("{", "}", src, start + 1)
+    start ++
+    // Trim white space
+    while(src[start] == " "){
+        start ++
+    }
+    // Check whether this is a multiple line body
+    let contain_newline = false
+    if(src[start] == "\n"){
+        start ++
+        contain_newline = true
+    }
+    let next = find_next_pairing_ignore_quote("{", "}", src, start)
     if (next == -1)
         return null
-    let param_src = src.slice(start + 1, next)
     let node = state.push_node("body")
-    node.delim = [start + 1, next]
-    //node.content = param_src
+    node.delim = [start, next]
+    node.typesetting_type = contain_newline ? "block" : "inline"
     state.pos = next + 1
     return node
 }
@@ -119,6 +130,7 @@ export function get_parse_skeleton(env_type: string, starter: string) {
                         //real_body_node.content = src.slice(func_start_pos, state.pos)
                         func_node.add_child(real_body_node)
                         // state.pos will remain in the state after parsing the fake_body_node
+                        real_body_node.typesetting_type = "direct_child"
                     }
                     state.curr_node = func_node
                 }
@@ -131,3 +143,8 @@ export function get_parse_skeleton(env_type: string, starter: string) {
     }
     return parse
 }
+
+
+//export class body_node extends parse_node{
+    
+//}

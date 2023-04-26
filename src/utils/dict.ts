@@ -10,6 +10,8 @@ enum dict_langs {
 }
 
 export function parse_dict(src: string, lang: string, state: parse_state): any {
+    if (src.length == 0)
+        return null
     switch (lang) {
         case "toml": {
             try {
@@ -17,7 +19,7 @@ export function parse_dict(src: string, lang: string, state: parse_state): any {
             }
             catch (error) {
                 state.push_warning_node_to_root("TOML Parsing error on line " + error.line + ", column " + error.column +
-                ": " + error.message)
+                    ": " + error.message)
                 return null
             }
         }
