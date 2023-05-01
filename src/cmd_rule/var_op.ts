@@ -8,7 +8,7 @@ function set_empty(cmd_node: parse_node, state: exec_state) {
 }
 
 
-export function exec_var_op(cmd_node: parse_node, state: exec_state): [obj_host, any] {
+export function exec_var_op(cmd_node: parse_node, state: exec_state): [obj_host, any, number] {
     let param = null
     let body_index = 0
     if (cmd_node.children[0]?.type == "param") {
@@ -31,5 +31,5 @@ export function exec_var_op(cmd_node: parse_node, state: exec_state): [obj_host,
         return
     }
     let host_to_operate = state.node_to_obj_host(first_child)
-    return [host_to_operate, param]
+    return [host_to_operate, param, body_index+1]
 }

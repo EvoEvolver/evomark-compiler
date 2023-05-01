@@ -3,6 +3,7 @@ import { exec_state, obj_host } from "../exec/exec";
 import { parse_node, func_rule } from "../parse";
 import { simple_literal_parser } from "../parser/common";
 import { get_first_body_node, store_literal_to_host } from "./common";
+import { exec_var_op } from "./var_op";
 
 function set_empty(cmd_node: parse_node, state: exec_state) {
     let var_use_node = cmd_node.push_child("body").set_typesetting_type("inline").push_child("var_use")
@@ -21,16 +22,14 @@ function exec(cmd_node: parse_node, state: exec_state, assigned: obj_host) {
         set_empty(cmd_node, state)
     }
 
-    let host = new obj_host()
-    let cmd_body = get_first_body_node(cmd_node)
-    store_literal_to_host(cmd_body, state, host)
-
+    let res = exec_var_op(cmd_node, state)
+    if (!res)
+        return
+    let [host, param, tail] = res
     let result_node = new parse_node("body")
     result_node.add_child(new parse_node("literal"))
         .set_content(host.get_content(state))
-    let body_index = cmd_body.get_self_index()
-    cmd_node.children[body_index+1] = result_node
-    
+    cmd_node.set_child_at(result_node, tail) 
 }
 
 export function show(core: evomark_core) {

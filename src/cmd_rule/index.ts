@@ -1,5 +1,7 @@
 import { evomark_core } from "../core";
+import { buffer } from "./buffer";
 import { def } from "./def";
+import { init } from "./init";
 import { lm } from "./lm";
 import { save } from "./save";
 import { set } from "./set";
@@ -12,4 +14,6 @@ export function essential_cmds(core: evomark_core) {
     lm(core)
     set(core)
     save(core)
+    buffer(core)
+    init(core)
 }

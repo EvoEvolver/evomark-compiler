@@ -19,7 +19,7 @@ function exec(cmd_node: parse_node, state: exec_state, assigned: obj_host) {
     let res = exec_var_op(cmd_node, state)
     if (!res)
         return
-    let [var_to_op, param] = res
+    let [var_to_op, param, _] = res
     state.save_var(var_to_op)
 }
 

@@ -93,6 +93,7 @@ export class evomark_exec {
                     cmd.add_sibling(new parse_node("cmd")).set_content("halted_here")
                 break
             }
+            state.cmd_pos++
         }
         return state
     }
@@ -113,6 +114,9 @@ export class exec_state {
     public halt_flag = false
     public last_var_assign: obj_host = null
     public warning_list: string[] = []
+    // A number that is different for each cmd in execution
+    // Designed for cache salt
+    public cmd_pos: number = 0
     public constructor(cache_table: any, saved_var_table: any) {
         this.cache_table = cache_table || {}
         this.saved_var_table = saved_var_table || {}
@@ -148,6 +152,9 @@ export class exec_state {
 
     public node_to_obj_host(var_use_node: parse_node): obj_host {
         let var_name = var_use_node.content
+        return this.name_to_obj_host(var_name)
+    }
+    public name_to_obj_host(var_name: string): obj_host {
         if (var_name in this.host_map) {
             return this.host_map[var_name]
         }
@@ -241,10 +248,7 @@ export class obj_host {
         return this.status != host_type.Undef
     }
     public assign_by(source_obj_host) {
-        for (let key in this) {
-            if (key === null || key === undefined)
-                this[key] == source_obj_host[key]
-        }
+
     }
 }
 

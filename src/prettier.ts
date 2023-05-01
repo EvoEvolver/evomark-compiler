@@ -131,7 +131,7 @@ function stringify_core(root: parse_node, indent: number, res: string[]) {
             }
             case "text":
             case "literal": {
-                if (node.content != "") {
+                if (node.content) {
                     add_space_for_inline(res)
                     push_multi_line_literal(node.content, res, indent)
                 }

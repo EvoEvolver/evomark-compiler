@@ -223,6 +223,11 @@ export class parse_node {
         node.parent = this
         return node
     }
+    public set_child_at(node: parse_node, idx: number): parse_node{
+        this.children[idx] = node
+        node.parent = this
+        return node
+    }
     public get_self_index() {
         let parent = this.parent
         return parent.children.findIndex((x) => x == this)
