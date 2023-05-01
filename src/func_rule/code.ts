@@ -6,7 +6,7 @@ import { simple_literal_parser } from "../parser/common";
 
 function tokenize(root: parse_node, tokens: token[], tokener: evomark_tokenizer, state: tokener_state) {
     for (let child of root.children) {
-        if (child.type == "func_body") {
+        if (child.type == "body") {
             let [open, close] = get_tag_pair("span")
             tokens.push(open)
             tokens.push(new token("literal", renderToString(child.content.trim(),

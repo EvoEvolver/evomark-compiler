@@ -6,7 +6,7 @@ import { get_pure_literal } from "./common";
 
 
 function exec(cmd_node: parse_node, state: exec_state, assigned: obj_host) {
-    if (cmd_node.children[0]?.type != "cmd_body") {
+    if (cmd_node.children[0]?.type != "body") {
         throw Error("bug")
     }
     if (assigned != null) {
@@ -22,10 +22,10 @@ function exec(cmd_node: parse_node, state: exec_state, assigned: obj_host) {
     // We compare whether two hash match
     let hash_node = cmd_node.children[1]
     if (!hash_node) {
-        cmd_node.add_child(new parse_node("cmd_param")).set_content_obj(host.input_hash)
+        cmd_node.add_child(new parse_node("param")).set_content_obj(host.input_hash)
     }
     else {
-        if (hash_node.type != "cmd_param") {
+        if (hash_node.type != "param") {
             throw Error("bug")
         }
         else if (hash_node.content_obj == null) {
@@ -37,7 +37,7 @@ function exec(cmd_node: parse_node, state: exec_state, assigned: obj_host) {
 
     let cache_content_node = cmd_node.children[2]
     if (cache_content_node) {
-        if (cache_content_node.type != "cmd_body")
+        if (cache_content_node.type != "body")
             throw Error("bug")
         let in_doc_cached_content = get_pure_literal(cache_content_node)
         if (in_doc_cached_content.trim() != "") {

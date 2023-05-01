@@ -25,7 +25,7 @@ function new_line_between_pos(pos1: number, pos2: number, cl_pos: number[]): boo
 function get_next_start(root: parse_node, cuur_i: number) {
     let next_start: number
     if (root.children[cuur_i + 1]) {
-        if (root.children[cuur_i + 1].type === "func_body") {
+        if (root.children[cuur_i + 1].type === "body") {
             next_start = root.children[cuur_i + 1].delim[0] - 1
         }
         else {
@@ -58,8 +58,8 @@ function stringify_core(root: parse_node, indent: number, res: string[]) {
                 stringify_core(node, indent, res)
                 break
             }
-            case "cmd_body":
-            case "func_body": {
+            case "body":
+            case "body": {
                 switch (node.typesetting_type) {
                     case "inline":
                         push_with_indent("{", res, 0)
@@ -79,7 +79,7 @@ function stringify_core(root: parse_node, indent: number, res: string[]) {
                         break
                     case "direct_child":
                         let func_node = node.children[0]
-                        if (node.type == "cmd_body")
+                        if (node.type == "body")
                             push_with_indent("$", res, 0)
                         else
                             push_with_indent("#", res, 0)
@@ -90,8 +90,8 @@ function stringify_core(root: parse_node, indent: number, res: string[]) {
 
                 break
             }
-            case "cmd_param":
-            case "func_param": {
+            case "param":
+            case "param": {
                 res.push("(")
                 res.push(JSON.stringify(node.content_obj))
                 res.push(")")

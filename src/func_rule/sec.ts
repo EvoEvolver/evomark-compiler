@@ -8,7 +8,7 @@ function tokenize(root: parse_node, tokens: token[], tokener: evomark_tokenizer,
     let [open, close] = get_tag_pair("h1")
     tokens.push(open)
     for (let child of root.children) {
-        if (child.type == "func_body") {
+        if (child.type == "body") {
             tokener.tokenize_core(child, tokens, state)
         }
     }

@@ -244,7 +244,7 @@ export class tokenize_rule_func {
 
 export function tokenize_box(root: parse_node, tokens: token[], tokener: evomark_tokenizer, state: tokener_state) {
     for (let child of root.children) {
-        if (child.type == "func_body") {
+        if (child.type == "body") {
             tokens.push(get_open_tag("div"))
             tokener.tokenize_core(child, tokens, state)
             tokens.push(get_close_tag("div"))

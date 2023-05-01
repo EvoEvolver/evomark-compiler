@@ -10,7 +10,7 @@ function tokenize(root: parse_node, tokens: token[], tokener: evomark_tokenizer,
     let img_src: string
     let has_written_body = false
     for (let child of root.children) {
-        if (child.type == "func_param") {
+        if (child.type == "param") {
             if(typeof child.content_obj === 'string'){
                 img_src = child.content_obj
             }else{
@@ -26,7 +26,7 @@ function tokenize(root: parse_node, tokens: token[], tokener: evomark_tokenizer,
                 tokens.push(img_token)
             }
         }
-        if (child.type == "func_body") {
+        if (child.type == "body") {
             if(has_written_body){
                 push_warning("Only one body is allowed", tokens)
                 break

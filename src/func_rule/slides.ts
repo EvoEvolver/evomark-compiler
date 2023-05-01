@@ -25,7 +25,7 @@ function tokenize_slides(root: parse_node, tokens: token[], tokener: evomark_tok
     }
     let body: parse_node, param: any
     if (root.children.length == 1) {
-        if (root.children[0].type != "func_body") {
+        if (root.children[0].type != "body") {
             push_warning("#slides must have body", tokens)
             return
         }
@@ -36,7 +36,7 @@ function tokenize_slides(root: parse_node, tokens: token[], tokener: evomark_tok
 
     }
     if (root.children.length == 2) {
-        if (root.children[0].type != "func_param" || root.children[1].type != "func_body") {
+        if (root.children[0].type != "param" || root.children[1].type != "body") {
             push_warning("Improper #slides", tokens)
             return
         }
@@ -59,7 +59,7 @@ function tokenize_slide(root: parse_node, tokens: token[], tokener: evomark_toke
     let [open, close] = get_tag_pair("Slide")
     tokens.push(open)
     for (let child of root.children) {
-        if (child.type == "func_body") {
+        if (child.type == "body") {
             tokener.tokenize_core(child, tokens, state)
         }
     }
@@ -75,10 +75,10 @@ function tokenize_clk(root: parse_node, tokens: token[], tokener: evomark_tokeni
 
     let clk_in = -1
     for (let child of root.children) {
-        if (child.type == "func_param") {
+        if (child.type == "param") {
             clk_in = Number(child.content)
         }
-        if (child.type == "func_body") {
+        if (child.type == "body") {
             // Check whether there is a valid clk_in id from param
             if (Number.isNaN(clk_in)) {
                 push_warning("Invalid order for clk", tokens)
@@ -104,7 +104,7 @@ function tokenize_clk(root: parse_node, tokens: token[], tokener: evomark_tokeni
 function tokenize_voice(root: parse_node, tokens: token[], tokener: evomark_tokenizer, state: tokener_state) {
     let tag = get_closed_tag("SlidesVoiceBox")
     for (let child of root.children) {
-        if (child.type == "func_body") {
+        if (child.type == "body") {
             let voice_text = get_pure_texts(child.children)
             tag.attrs = { text: voice_text }
             tokens.push(tag)

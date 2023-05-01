@@ -5,7 +5,7 @@ import { evomark_tokenizer, get_closed_tag, get_tag_pair, push_warning, token, t
 
 function parse(src: string, state: parse_state, parser: evomark_parser) {
     for (let node of state.curr_node.children) {
-        if (node.type != "func_body")
+        if (node.type != "body")
             continue
         let content = src.slice(node.delim[0], node.delim[1]).trim()
         if (content[0] != "@") {
@@ -29,7 +29,7 @@ function parse(src: string, state: parse_state, parser: evomark_parser) {
 }
 
 function tokenize(root: parse_node, tokens: token[], tokener: evomark_tokenizer, state: tokener_state) {
-    if (root.children.length != 1 || root.children[0].type != "func_body") {
+    if (root.children.length != 1 || root.children[0].type != "body") {
         push_warning("#ref must have exactly one body", tokens)
         return
     }

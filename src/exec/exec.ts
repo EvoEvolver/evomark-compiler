@@ -127,7 +127,7 @@ export class evomark_exec {
                         let message = state.warning_list.join("\n")
                         cmd.add_sibling(new parse_node("cmd"))
                             .set_content("warning")
-                            .push_child("cmd_body")
+                            .push_child("body")
                             .push_child("literal")
                             .set_content(message)
                         cmd.add_sibling(new parse_node("sep")).set_content_obj(1)

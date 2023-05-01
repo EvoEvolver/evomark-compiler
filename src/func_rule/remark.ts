@@ -16,14 +16,14 @@ function tokenize(root: parse_node, tokens: token[], tokener: evomark_tokenizer,
     let title: string
     let type: string
     for (let child of root.children) {
-        if (child.type == "func_param") {
+        if (child.type == "param") {
             let param = child.content_obj
             if(param || typeof param === 'object'){
                 title = param.title
                 type = param.type
             }
         }
-        if (child.type == "func_body") {
+        if (child.type == "body") {
             // Decide the type when not provided in param
             if(!type){
                 if(child.children.length == 1 && child.children[0].type == "func"){

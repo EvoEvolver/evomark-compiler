@@ -9,7 +9,7 @@ export function make_simple_rule(func_name: string, tag_name: string) {
         let [open, close] = get_tag_pair(tag_name)
         tokens.push(open)
         for (let child of root.children) {
-            if (child.type == "func_body") {
+            if (child.type == "body") {
                 tokener.tokenize_core(child, tokens, state)
             }
         }

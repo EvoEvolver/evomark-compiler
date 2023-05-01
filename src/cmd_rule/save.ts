@@ -5,7 +5,7 @@ import { simple_literal_parser } from "../parser/common";
 import { get_first_body_node, store_literal_to_host } from "./common";
 
 function set_empty(cmd_node: parse_node, state: exec_state) {
-    let var_use_node = cmd_node.push_child("cmd_body").set_typesetting_type("inline").push_child("var_use")
+    let var_use_node = cmd_node.push_child("body").set_typesetting_type("inline").push_child("var_use")
     var_use_node.set_content(state.last_var_assign.var_name)
 
 }

@@ -21,7 +21,7 @@ export function get_pure_literal(cmd_body: parse_node): string {
 
 export function get_first_body_node(cmd_node: parse_node) {
     for (let child of cmd_node.children) {
-        if (child.type.endsWith("_body"))
+        if (child.type=="body")
             return child
     }
     return null

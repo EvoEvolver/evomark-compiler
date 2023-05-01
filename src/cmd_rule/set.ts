@@ -20,17 +20,17 @@ function set_empty(cmd_node: parse_node, state: exec_state) {
     }
 
     // Set variable
-    let var_use_node = cmd_node.push_child("cmd_body").set_typesetting_type("inline").push_child("var_use")
+    let var_use_node = cmd_node.push_child("body").set_typesetting_type("inline").push_child("var_use")
     if (host.var_name == null)
         throw Error("Bug!!")
     var_use_node.set_content(host.var_name)
 
     // Set hash
-    let hash_node = cmd_node.push_child("cmd_param")
+    let hash_node = cmd_node.push_child("param")
     hash_node.set_content_obj(host.input_hash)
 
     // Set cache content
-    let cache_content_node = cmd_node.push_child("cmd_body")
+    let cache_content_node = cmd_node.push_child("body")
     cache_content_node.children = []
     cache_content_node.push_child("literal").set_content(cached_res)
 
@@ -50,7 +50,7 @@ function exec(cmd_node: parse_node, state: exec_state, assigned: obj_host) {
     if (cmd_node.children.length == 0)
         set_empty(cmd_node, state)
 
-    if (cmd_node.children[0]?.type != "cmd_body") {
+    if (cmd_node.children[0]?.type != "body") {
         state.add_warning("The first child must be a body with a var inside")
         return
     }
@@ -81,10 +81,10 @@ function exec(cmd_node: parse_node, state: exec_state, assigned: obj_host) {
     if (!hash_node) {
         state.add_warning("A hash must be provided")
         return
-        //cmd_node.add_child(new parse_node("cmd_param")).set_content_obj(host.input_hash)
+        //cmd_node.add_child(new parse_node("param")).set_content_obj(host.input_hash)
     }
 
-    if (hash_node.type != "cmd_param") {
+    if (hash_node.type != "param") {
         state.add_warning("The sencond child should be a param with hash of input in side")
         return
     }
@@ -99,7 +99,7 @@ function exec(cmd_node: parse_node, state: exec_state, assigned: obj_host) {
         return
     }
 
-    if (cache_content_node.type != "cmd_body") {
+    if (cache_content_node.type != "body") {
         state.add_warning("The content to set must be in a body")
         return
     }

@@ -89,8 +89,8 @@ export function parse_func(src: string, state: parse_state, parser: evomark_pars
 export const parse_func_skeleton = get_parse_skeleton("func", "#")
 
 export function get_parse_skeleton(env_type: string, starter: string) {
-    const param_node_type = env_type + "_param" // func_body or func_param
-    const body_node_type = env_type + "_body" // func_body or cmd_body
+    const param_node_type = "param" // func_body or func_param
+    const body_node_type = "body" // func_body or cmd_body
     function parse(src: string, state: parse_state, parser: evomark_parser): boolean {
         let start = state.pos
         if (start == state.end - 1) {
