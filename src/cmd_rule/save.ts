@@ -1,5 +1,5 @@
 import { evomark_core } from "../core"
-import { exec_state, obj_host } from "../exec/exec";
+import { exec_state, host_type, obj_host } from "../exec/exec";
 import { parse_node, func_rule } from "../parse";
 import { simple_literal_parser } from "../parser/common";
 import { get_first_body_node, store_literal_to_host } from "./common";
@@ -25,15 +25,11 @@ function exec(cmd_node: parse_node, state: exec_state, assigned: obj_host) {
     let cmd_body = get_first_body_node(cmd_node)
     store_literal_to_host(cmd_body, state, host)
 
-    let result_node = new parse_node("cmd_body")
-    result_node.add_child(new parse_node("literal"))
-        .set_content(host.get_content(state))
-    let body_index = cmd_body.get_self_index()
-    cmd_node.children[body_index+1] = result_node
     
+
 }
 
-export function show(core: evomark_core) {
-    core.parser.add_cmd_rule(new func_rule("show", simple_literal_parser))
-    core.add_exec_rule("show", exec)
+export function save(core: evomark_core) {
+    core.parser.add_cmd_rule(new func_rule("save", simple_literal_parser))
+    core.add_exec_rule("save", exec)
 }

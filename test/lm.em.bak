@@ -15,7 +15,7 @@ $cache{%definition}("4ba81fb2ecb72615dbdf98e52949c0dc"){
 %summarize = $lm{Summarize %definition. Answer:}
 
 %context = $def{
-  %context
+  %context 
   %summarize
 }
 
@@ -58,8 +58,6 @@ $t{
         #clk#voice{
         %definition      
       }
-  
   }
-
 }
 

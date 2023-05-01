@@ -87,7 +87,7 @@ export function parse_sep(src: string, state: parse_state, parser: evomark_parse
 
 }
 
-export var valid_identifier_name_char = /[a-zA-Z0-9._]/
+export var valid_identifier_name_char = /[a-zA-Z0-9_]/
 
 export function is_valid_identifier(src: string): boolean {
     return /^[a-zA-Z0-9._]+$/.test(src)
@@ -206,6 +206,10 @@ export class parse_node {
         this.content_obj = content_obj
         return this
     }
+    public set_typesetting_type(typesetting_type: string): parse_node {
+        this.typesetting_type = typesetting_type
+        return this
+    }
     public write_tree(): string {
         return this.write_tree_with_level(0)
     }
@@ -232,6 +236,10 @@ export class parse_node {
                 return this.parent.children[i]
         }
         return null
+    }
+    public remove_self_from_parent(){
+        let self_index = this.get_self_index()
+        this.parent.children.splice(self_index, 1)
     }
     public add_sibling(node: parse_node): parse_node {
         let self_index = this.get_self_index()

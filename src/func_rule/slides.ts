@@ -4,6 +4,7 @@ import { evomark_core } from "../core"
 import { evomark_parser, parse_node, func_rule, parse_state } from "../parse";
 import { evomark_tokenizer, get_close_tag, get_closed_tag, get_open_tag, get_tag_pair, push_warning, token, tokenize_rule_func, tokener_state } from "../tokenize";
 import { simple_literal_parser, simple_parser } from "../parser/common";
+import { get_pure_texts } from "../tokenize/common";
 
 
 function parse_slides(src:string, state: parse_state, parser: evomark_parser){
@@ -104,7 +105,8 @@ function tokenize_voice(root: parse_node, tokens: token[], tokener: evomark_toke
     let tag = get_closed_tag("SlidesVoiceBox")
     for (let child of root.children) {
         if (child.type == "func_body") {
-            tag.attrs = { text: child.content.trim() }
+            let voice_text = get_pure_texts(child.children)
+            tag.attrs = { text: voice_text }
             tokens.push(tag)
             break
         }

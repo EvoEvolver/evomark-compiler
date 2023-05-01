@@ -94,8 +94,11 @@ export function parse_literal_with_cmd(src: string, state: parse_state, parser: 
             continue
         if (parse_cmd(src, state, parser))
             continue
-        console.log("There is no available rules. Abort.")
-        return false
+        if (state.pos < state.end) {
+            console.log("There is no available rules. Abort.")
+            return true
+        } else
+            return false
     }
 }
 

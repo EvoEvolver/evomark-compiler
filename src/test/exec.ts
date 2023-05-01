@@ -8,21 +8,5 @@ var args = process.argv.slice(2);
 let file_path = args[0]
 let src: string = fs.readFileSync(file_path, { encoding: 'utf8' })
 let core = make_default_core()
-let [root, parse_state] = core.parser.parse(src, null)
-console.log(root.write_tree())
-let cache_table: any
-if (fs.existsSync(file_path + ".cache.json")) {
-    let json_raw = fs.readFileSync(file_path + ".cache.json", { encoding: 'utf8' })
-    if (json_raw.trim().length == 0)
-        json_raw = "{}"
-    cache_table = JSON.parse(json_raw)
-}
-else {
-    cache_table = null
-}
-let exec_state = core.executor.exec(root, cache_table)
-let res = stringify(root)
-fs.writeFileSync(file_path + ".cache.json", JSON.stringify(exec_state.cache_table))
-fs.writeFileSync(file_path + ".bak", src)
-fs.writeFileSync(file_path, res)
-console.log(root.write_tree())
+let [rendered, page_info] = core.process(src, null, file_path)
+console.log(rendered)

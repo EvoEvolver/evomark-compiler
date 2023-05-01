@@ -14,3 +14,4 @@ $t{
   Hello, my name is [name].
 }
 
+%res

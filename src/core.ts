@@ -1,7 +1,8 @@
 import { evomark_exec } from "./exec/exec"
-import { cmd_rule, evomark_parser, func_parser, func_rule } from "./parse"
+import { cmd_rule, evomark_parser, func_parser, func_rule, parse_node } from "./parse"
+import { stringify } from "./prettier"
 import { evomark_tokenizer, func_tokenizer, tokener_state, tokenize_rule_func } from "./tokenize"
-
+import * as fs from 'fs'
 
 export class evomark_core {
 
@@ -41,13 +42,36 @@ export class evomark_core {
         this.register_modules(name, modules)
     }
 
-    public process(src: string, emconfig: any): [string, any] {
+    public process(src: string, emconfig: any, file_path: string): [string, any] {
         if (!emconfig) {
             emconfig = {}
         }
         let [root, parse_state] = this.parser.parse(src, emconfig)
-        
+        console.log(root.write_tree())
+        this.exec(file_path, root, src)
         let [tokens, tokener_state] = this.tokenizer.tokenize(root, parse_state)
+        return this.process_tokens(tokens, tokener_state)
+    }
+
+    public exec(file_path: string, root: parse_node, old_src: string) {
+        let ctx: any
+        if (fs.existsSync(file_path + ".ctx.json")) {
+            let json_raw = fs.readFileSync(file_path + ".ctx.json", { encoding: 'utf8' })
+            if (json_raw.trim().length == 0)
+                json_raw = "{}"
+            ctx = JSON.parse(json_raw)
+        }
+        else {
+            ctx = {}
+        }
+        let exec_state = this.executor.exec(root, ctx)
+        let res = stringify(root)
+        fs.writeFileSync(file_path + ".ctx.json", JSON.stringify(exec_state.get_ctx()))
+        fs.writeFileSync(file_path + ".bak", old_src)
+        fs.writeFileSync(file_path, res)
+    }
+
+    public process_tokens(tokens, tokener_state): [string, any] {
         let render_res = ["<template>\n<Document>\n"]
         for (let token of tokens) {
             render_res.push(token.write())

@@ -1,14 +1,5 @@
-import { evomark_parser, parse_node } from "./parse"
-import { evomark_tokenizer } from "./tokenize"
-import * as fs from 'fs'
-import { evomark_core } from "./core"
-import { make_default_core } from "./default"
-let parser = new evomark_parser()
-var args = process.argv.slice(2);
-let file_path = args[0]
-let src: string = fs.readFileSync(file_path, { encoding: 'utf8' })
-let core = make_default_core()
-let [root, parse_state] = core.parser.parse(src, null)
+import { parse_node } from "./parse"
+
 
 function push_with_indent(content: string, res: string[], indent: number) {
     res.push("  ".repeat(indent) + content)
@@ -47,7 +38,15 @@ function get_next_start(root: parse_node, cuur_i: number) {
     return next_start
 }
 
-function stringify_core(root: parse_node, indent: number, res: string[], cl_pos: number[]) {
+function change_line(res: string[], state: stringify_state){
+
+}
+
+class stringify_state{
+    
+}
+
+function stringify_core(root: parse_node, indent: number, res: string[]) {
     for (let i = 0; i < root.children.length; i++) {
         let node = root.children[i]
         switch (node.type) {
@@ -55,8 +54,8 @@ function stringify_core(root: parse_node, indent: number, res: string[], cl_pos:
             case "func": {
                 let starter = "#"
                 if (node.type == "cmd") starter = "$"
-                push_with_indent(starter + node.content, res, indent)
-                stringify_core(node, indent, res, cl_pos)
+                push_with_indent(starter + node.content, res, 0)
+                stringify_core(node, indent, res)
                 break
             }
             case "cmd_body":
@@ -64,7 +63,7 @@ function stringify_core(root: parse_node, indent: number, res: string[], cl_pos:
                 switch (node.typesetting_type) {
                     case "inline":
                         push_with_indent("{", res, 0)
-                        stringify_core(node, 0, res, cl_pos)
+                        stringify_core(node, 0, res)
                         push_with_indent("}", res, 0)
                         break
                     default:
@@ -74,7 +73,7 @@ function stringify_core(root: parse_node, indent: number, res: string[], cl_pos:
                         else
                             push_with_indent("{\n", res, 0)
                         push_with_indent("", res, indent + 1)
-                        stringify_core(node, indent + 1, res, cl_pos)
+                        stringify_core(node, indent + 1, res)
                         push_with_indent("\n", res, indent)
                         push_with_indent("}\n", res, indent)
                         break
@@ -85,7 +84,7 @@ function stringify_core(root: parse_node, indent: number, res: string[], cl_pos:
                         else
                             push_with_indent("#", res, 0)
                         push_with_indent(func_node.content, res, 0)
-                        stringify_core(func_node, indent + 1, res, cl_pos)
+                        stringify_core(func_node, indent, res)
                         break
                 }
 
@@ -100,17 +99,17 @@ function stringify_core(root: parse_node, indent: number, res: string[], cl_pos:
             }
             case "ref": {
                 push_with_indent("@" + node.content + "=\n", res, indent)
-                stringify_core(node, indent, res, cl_pos)
+                stringify_core(node, indent, res)
                 break
             }
             case "var_assign": {
                 if (node.typesetting_type == "one_line")
-                    push_with_indent("%" + node.content + " = ", res, indent)
+                    push_with_indent("%" + node.content + " = ", res, 0)
                 else if (node.typesetting_type == "two_line")
                     push_with_indent("%" + node.content + "=\n", res, indent)
                 else
-                    push_with_indent("%" + node.content + "=\n", res, indent)
-                stringify_core(node, indent, res, cl_pos)
+                    push_with_indent("%" + node.content + "=\n", res, 0)
+                stringify_core(node, indent, res)
                 break
             }
             case "var_use": {
@@ -193,8 +192,7 @@ function get_line_num(pos: number, cl_pos: number[]) {
 }
 
 export function stringify(root: parse_node) {
-    let cl_pos = get_change_line_pos(src)
     let res = []
-    stringify_core(root, 0, res, cl_pos)
+    stringify_core(root, 0, res)
     return res.join("")
 }

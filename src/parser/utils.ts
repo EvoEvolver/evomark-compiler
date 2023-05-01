@@ -3,7 +3,7 @@ export function find_next_pairing_ignore_quote(open: string, close: string, src:
     let curr_quote = -1
     let nest = 1
     for (let pos = start; pos < src.length; pos++) {
-        let quote = "\"'".indexOf(src[pos])
+        let quote = "\"".indexOf(src[pos])
         if (curr_quote == -1) {
             if (quote >= 0) {
                 curr_quote = quote

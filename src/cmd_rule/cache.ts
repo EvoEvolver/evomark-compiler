@@ -16,7 +16,7 @@ function exec(cmd_node: parse_node, state: exec_state, assigned: obj_host) {
         throw Error("bug")
     }
     let host = state.get_obj_host(cmd_node.children[0].children[0])
-    if (host.type != host_type.Lazy) {
+    if (host.status != host_type.Lazy) {
         throw Error("bug")
     }
     // We compare whether two hash match

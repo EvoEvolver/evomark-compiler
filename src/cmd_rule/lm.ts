@@ -18,7 +18,7 @@ async function query_lm_async(prompt: string): Promise<string> {
         completion = await openai.createCompletion({
             model: "text-davinci-003",
             prompt: prompt,
-            max_tokens: 1000,
+            max_tokens: 2000,
         });
         console.log(completion.data.choices[0].text);
     } catch (error) {

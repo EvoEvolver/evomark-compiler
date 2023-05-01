@@ -52,8 +52,9 @@ export function parse_body(src: string, state: parse_state): parse_node {
     let next = find_next_pairing_ignore_quote("{", "}", src, start)
     if (next == -1)
         return null
+    // Trim the spaces and last change line
     let end = next - 1
-    for (; end > start; end--) {
+    for (; end >= start; end--) {
         if(src[end]==" ")
             continue
         if(src[end]=="\n")

@@ -10,10 +10,9 @@ import { em } from "./func_rule/simple_rules"
 import { remark } from "./func_rule/remark"
 import { def } from "./cmd_rule/def"
 import { hello } from "./cmd_rule/hello"
-import { cache } from "./cmd_rule/cache"
 import { show } from "./cmd_rule/show"
-import { t } from "./cmd_rule/t"
 import { lm } from "./cmd_rule/lm"
+import { set } from "./cmd_rule/set"
 
 export function make_default_core(): evomark_core {
     let core = new evomark_core()
@@ -33,9 +32,8 @@ export function make_default_core(): evomark_core {
     def(core)
     show(core)
     hello(core)
-    cache(core)
-    t(core)
     lm(core)
+    set(core)
     
     return core
 }

@@ -1,0 +1,28 @@
+
+
+%ctx = $def{
+  Writing a passage for introduing a marking language for academic writing.
+  The new language is call Evomark.
+  Evomark aims to empower paper writing with language models.
+  Evomark can help write paper faster and more accurate.
+}
+
+%p = $lm{
+  Based on %ctx .
+  
+  
+  Write a introduction paragraph to Evomark.
+}
+$show{%p}
+$t{
+  Welcome to Evomark, a revolutionary new language designed to assist in academic writing. Evomark seeks to enhance communication through a specialized syntax that allows writers to create precise and effective sentence structure to accurately reflect the intended message. Equipped with cutting-edge tools and language models, users can let their ideas flow seamlessly into compelling and persuasive papers. Evomark is a powerful ally in the writing process, providing a comprehensive way of structuring and presenting arguments. With Evomark, your message will be carefully crafted, leaving a lasting impression.
+}
+%p
+
+
+#sec{Background}
+
+%bg = $def{
+  LaTeX is a macro language.
+}
+

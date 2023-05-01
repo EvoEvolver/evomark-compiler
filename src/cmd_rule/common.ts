@@ -36,15 +36,17 @@ export function store_literal_to_host(cmd_body: parse_node, state: exec_state, h
     for (let node of cmd_body.children) {
         if (node.type == "var_use") {
             let var_host = state.get_obj_host(node)
-            if (var_host != null)
+            if (var_host != null) {
                 var_uses.push(var_host)
+                if (var_host.status == host_type.Undef) {
+                    has_undef = true
+                }
+            }
             else {
                 has_undef = true
                 var_uses.push(null)
             }
-            if (var_host.type == host_type.Undef) {
-                has_undef = true
-            }
+
         }
     }
     let res: string[] = []
@@ -53,10 +55,8 @@ export function store_literal_to_host(cmd_body: parse_node, state: exec_state, h
         if (node.type == "var_use") {
             let var_host = var_uses[i_var]
             if (var_host != null) {
-                let content = var_host.content()
-                if (content == "*Undef*" && var_host.type == host_type.Lazy) {
-                    content = eval_and_cache(var_host, state.cache_table)
-                }
+                let content = var_host.get_content(state)
+
                 res.push(content + " ")
             }
             else
@@ -73,38 +73,30 @@ export function store_literal_to_host(cmd_body: parse_node, state: exec_state, h
     host.dependency = var_uses
     host.set_content(normalize_text(res.join("")))
     if (has_undef) {
-        host.type = host_type.Undef
+        host.status = host_type.Undef
     }
     else {
-        host.type = host_type.InDoc
+        host.status = host_type.InDoc
     }
 }
 
 
-export function eval_and_cache(host: obj_host, cache_table: any): any {
-    let cached = cache_table[host.input_hash]
-    if (cached != undefined)
-        return cached
-    let res = host.eval_func(host.input)
-    cache_table[host.input_hash] = res
-    host.set_content(res)
-    return res
-}
+
 
 
 export function set_lazy_variable(state: exec_state, input_cmd_body: parse_node, assigned: obj_host, caller_name: string, eval_func: (input: any) => any) {
     let host = new obj_host()
     store_literal_to_host(input_cmd_body, state, host)
-    if (host.type == host_type.Undef) {
-        assigned.type = host_type.Undef
+    if (host.status == host_type.Undef) {
+        assigned.status = host_type.Undef
         return
     }
-    let input = host.content()
+    let input = host.get_content(state)
     let input_hash = get_hash(input, caller_name)
     let cache_in_table = state.read_cache(input_hash)
     assigned.dependency = host.dependency
     assigned.input_hash = input_hash
-    assigned.type = host_type.Lazy
+    assigned.status = host_type.Lazy
     if (cache_in_table) {
         assigned.set_content(cache_in_table)
     }

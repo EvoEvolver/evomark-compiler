@@ -16,7 +16,7 @@ export function compile_all(src_path: string, input_base: string, output_base: s
                 if (is_forbidden_path(filepath)) {
                     return
                 } else {
-                    load("init", filepath, input_base, output_base, ctx)
+                    load_file("init", filepath, input_base, output_base, ctx)
                 }
             })
             save_ctx(ctx, output_base)
@@ -42,7 +42,7 @@ const loader_map: Record<string, loader_func> = {
     ".toml": load_config
 }
 
-function load(evt, file_path: string, input_base, output_base, ctx) {
+export function load_file(evt, file_path: string, input_base, output_base, ctx) {
     if (evt == 'remove') {
         return
     }

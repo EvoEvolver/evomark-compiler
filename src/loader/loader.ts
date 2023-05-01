@@ -40,7 +40,7 @@ export function load_evomark(file_path: string, input_base: string, output_base:
     }
     try {
         let content: string = fs.readFileSync(file_path, "utf-8")
-        let res = core.process(content, env)
+        let res = core.process(content, env, file_path)
         rendered = res[0]
         page_info = res[1]
     } catch (error) {

@@ -34,6 +34,7 @@ export class evomark_tokenizer {
     public tokenize_core(root: parse_node, tokens: token[], state: tokener_state) {
         for (let node of root.children) {
             switch (node.type) {
+                case "literal":
                 case "text": {
                     tokens.push(get_open_tag("span").set_class("text"))
                     tokens.push(new token("text", node.content))
@@ -77,10 +78,15 @@ export class evomark_tokenizer {
                     break
                 }
                 case "var_use": {
+                    this.tokenize_core(node, tokens, state)
+                    break
+                }
+                case "cmd": {
                     break
                 }
                 case "sep": {
-                    tokens.push(new tag_token("br", 0, null))
+                    if(node.content_obj>=2 && tokens.at(-1)?.content!="br")
+                        tokens.push(new tag_token("br", 0, null))
                     break
                 }
                 case "warning": {
