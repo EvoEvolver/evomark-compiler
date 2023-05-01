@@ -1,4 +1,4 @@
-import { exec_state, get_hash, host_type, obj_host } from "../exec/exec"
+import { eval_to_text, exec_state, get_hash, host_type, obj_host } from "../exec/exec"
 import { parse_node } from "../parse"
 import { normalize_text } from "../utils/normalize"
 
@@ -21,7 +21,7 @@ export function get_pure_literal(cmd_body: parse_node): string {
 
 export function get_first_body_node(cmd_node: parse_node) {
     for (let child of cmd_node.children) {
-        if (child.type=="body")
+        if (child.type == "body")
             return child
     }
     return null
@@ -31,56 +31,16 @@ export function get_first_body_node(cmd_node: parse_node) {
 export function store_literal_to_host(cmd_body: parse_node, state: exec_state, host: obj_host): void {
     if (cmd_body == null)
         throw Error("A body is needed")
-    let var_uses: obj_host[] = []
-    let has_undef = false
-    for (let node of cmd_body.children) {
-        if (node.type == "var_use") {
-            let var_host = state.get_obj_host(node)
-            if (var_host != null) {
-                var_uses.push(var_host)
-                if (var_host.status == host_type.Undef) {
-                    has_undef = true
-                }
-            }
-            else {
-                has_undef = true
-                var_uses.push(null)
-            }
-
-        }
-    }
-    let res: string[] = []
-    let i_var = 0
-    for (let node of cmd_body.children) {
-        if (node.type == "var_use") {
-            let var_host = var_uses[i_var]
-            if (var_host != null) {
-                let content = var_host.get_content(state)
-
-                res.push(content + " ")
-            }
-            else
-                res.push("*Error*")
-            i_var++
-        }
-        else if (node.type == "literal") {
-            res.push(node.content + " ")
-        }
-        else if (node.type == "sep") {
-            res.push("\n".repeat(node.content_obj))
-        }
-    }
-    host.dependency = var_uses
-    host.set_content(normalize_text(res.join("")))
-    if (has_undef) {
+    let [text, dependency] = eval_to_text(cmd_body.children, state)
+    host.dependency = dependency
+    host.set_content(text)
+    if (text == null) {
         host.status = host_type.Undef
     }
     else {
         host.status = host_type.InDoc
     }
 }
-
-
 
 
 

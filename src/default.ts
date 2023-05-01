@@ -8,11 +8,8 @@ import { ref } from "./func_rule/ref"
 import { section } from "./func_rule/sec"
 import { em } from "./func_rule/simple_rules"
 import { remark } from "./func_rule/remark"
-import { def } from "./cmd_rule/def"
-import { hello } from "./cmd_rule/hello"
-import { show } from "./cmd_rule/show"
-import { lm } from "./cmd_rule/lm"
-import { set } from "./cmd_rule/set"
+import { essential_cmds } from "./cmd_rule"
+
 
 export function make_default_core(): evomark_core {
     let core = new evomark_core()
@@ -28,12 +25,8 @@ export function make_default_core(): evomark_core {
     em(core)
     remark(core)
 
-    // cmd rules
-    def(core)
-    show(core)
-    hello(core)
-    lm(core)
-    set(core)
+    essential_cmds(core)
+
     
     return core
 }

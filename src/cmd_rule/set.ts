@@ -2,7 +2,7 @@ import { evomark_core } from "../core"
 import { eval_and_cache, exec_state, host_type, obj_host } from "../exec/exec";
 import { parse_node, func_rule } from "../parse";
 import { simple_literal_parser } from "../parser/common";
-import { get_pure_literal, store_literal_to_host } from "./common";
+import { store_literal_to_host } from "./common";
 
 
 function set_empty(cmd_node: parse_node, state: exec_state) {
@@ -61,7 +61,7 @@ function exec(cmd_node: parse_node, state: exec_state, assigned: obj_host) {
         return
     }
 
-    let host = state.get_obj_host(var_use_node)
+    let host = state.node_to_obj_host(var_use_node)
 
     // The set of variable must be in a certain scope
 

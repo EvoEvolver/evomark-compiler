@@ -1,62 +1,8 @@
 import { parse_node } from "../parse";
 import { hash as spark_hash } from "spark-md5"
+import { normalize_text } from "../utils/normalize";
+
 let type_of_cmd = ["var_use", "cmd", "var_assign"]
-export type exec_pos = [curr_node: parse_node, index_stack: number[]]
-
-/* 
-export function move_to_next_cmd(pos: exec_pos): boolean {
-    let stack_top = pos[1].length - 1
-    let curr_node = pos[0]
-    for (let i = pos[1][stack_top]; i < pos[0].children.length; i++) {
-        // get next by DFS
-        let child = pos[0].children[i]
-        // Return if the child is a cmd
-        if (type_of_cmd.indexOf(child.type) > -1) {
-            pos[1][stack_top] = i
-            return true
-        }
-        // If not a cmd, check whether the node has children
-        else if (child.children.length > 0) {
-            pos[0] = child
-            pos[1].push(0)
-            let next = move_to_next_cmd(pos)
-            if (next != false)
-                return true
-            else {
-                // If no cmd found, restore the original state
-                pos[1].pop()
-                pos[0] = curr_node
-            }
-        }
-    }
-    return false
-}
-
-
-export function get_cmd_list(root: parse_node): parse_node[] {
-    let pos: exec_pos = [root, [0]]
-    let cmd_list = []
-    while (true) {
-        let cmd = move_to_next_cmd(pos)
-        let stack_top = pos[1].length - 1
-        if (cmd) {
-
-            let children_index = pos[1][stack_top]
-            cmd_list.push(pos[0].children[children_index])
-            pos[1][stack_top] += 1
-        }
-        else {
-            if (pos[1][stack_top] == pos[0].children.length) {
-                pos[1].pop()
-                pos[1][pos[1].length - 1]++
-                pos[0] = pos[0].parent
-            }
-            if (pos[1].length == 0)
-                break
-        }
-    }
-    return cmd_list
-}*/
 
 export const special_one_time_cmd = ["warning", "halted_here"]
 
@@ -93,7 +39,7 @@ export class evomark_exec {
         for (let cmd of cmd_list) {
             switch (cmd.type) {
                 case "var_use": {
-                    let host = state.get_obj_host(cmd)
+                    let host = state.node_to_obj_host(cmd)
                     if (host == null)
                         throw Error("Undefined variable %" + cmd.content)
                     cmd.add_child(new parse_node("literal")).set_content(host.get_content(state))
@@ -139,7 +85,7 @@ export class evomark_exec {
                     throw Error("bug found")
             }
             if (state.halt_flag) {
-                let sibling = cmd.get_next_non_sep_sibling()
+                let sibling = cmd.get_next_semantic_sibling()
                 // Check whether there has already been a label
                 if (sibling?.type == "cmd" && sibling.content == "halted_here")
                     break
@@ -171,7 +117,7 @@ export class exec_state {
         this.cache_table = cache_table || {}
         this.saved_var_table = saved_var_table || {}
     }
-    public get_ctx(){
+    public get_ctx() {
         return {
             "cache": this.cache_table,
             "saved": this.saved_var_table
@@ -185,24 +131,36 @@ export class exec_state {
         }
         let content_to_save = host.get_content(this)
         let var_name = host.var_name
-        this.saved_var_table[var_name] = content_to_save
+        this.saved_var_table[var_name] = {
+            "t": host.data_type,
+            "v": content_to_save
+        }
     }
 
-    public load_saved_var(var_name: string){
+    public load_saved_var(var_name: string) {
         // TODO handle date type
-        if(var_name in this.saved_var_table){
+        if (var_name in this.saved_var_table) {
             return this.saved_var_table[var_name]
         }
         else
             return null
     }
 
-    public get_obj_host(var_use_node: parse_node): obj_host {
+    public node_to_obj_host(var_use_node: parse_node): obj_host {
         let var_name = var_use_node.content
         if (var_name in this.host_map) {
             return this.host_map[var_name]
         }
         else {
+            if (var_name in this.saved_var_table) {
+                let saved_entry = this.saved_var_table[var_name]
+                let host = new obj_host()
+                host.status = host_type.Saved
+                host.var_name = var_name
+                host.data_type = saved_entry["t"]
+                host.set_content(saved_entry["v"])
+                return host
+            }
             return null
         }
     }
@@ -234,6 +192,7 @@ export enum host_type {
     Undef,
     Lazy, // In this case, the content of the host is the input hash
     InDoc,  // Normal case. The content is deduced from the document
+    Saved
 }
 
 export class obj_host {
@@ -246,20 +205,32 @@ export class obj_host {
     public eval_func: (input: any) => any = null
     private _content: any = null
     public dependency: obj_host[] = []
-    public get_content(exec_state: exec_state): any {
+    public get_content(state: exec_state): any {
         if (this._content == null) {
             if (this.status == host_type.Lazy) {
-                let res = eval_and_cache(this, exec_state.cache_table)
+                let res = eval_and_cache(this, state.cache_table)
                 if (res == null) {
                     this._content == null
                 }
                 this._content = res
                 return this._content
             }
-            return "*Undef*"
+            return null
         }
         else
             return this._content
+    }
+    public get_text(state: exec_state): string {
+        let content = this.get_content(state)
+        switch (this.data_type) {
+            case "str": {
+                return content
+            }
+            default:
+            case "obj": {
+                return JSON.stringify(content)
+            }
+        }
     }
     public set_content(content: any) {
         this._content = content
@@ -268,6 +239,12 @@ export class obj_host {
     }
     public defined() {
         return this.status != host_type.Undef
+    }
+    public assign_by(source_obj_host) {
+        for (let key in this) {
+            if (key === null || key === undefined)
+                this[key] == source_obj_host[key]
+        }
     }
 }
 
@@ -279,4 +256,56 @@ export function eval_and_cache(host: obj_host, cache_table: any): any {
     cache_table[host.input_hash] = res
     host.set_content(res)
     return res
+}
+
+export function eval_to_text(nodes: parse_node[], state: exec_state): [string, obj_host[]] {
+    let dependency: obj_host[] = []
+    let undef = []
+    for (let node of nodes) {
+        if (node.type == "var_use") {
+            let var_host = state.node_to_obj_host(node)
+            if (var_host != null) {
+                dependency.push(var_host)
+                if (var_host.status == host_type.Undef) {
+                    undef.push(node.content)
+                }
+            }
+            else {
+                undef.push(node.content)
+                dependency.push(null)
+            }
+
+        }
+    }
+    let res: string[] = []
+    let i_var = 0
+    for (let node of nodes) {
+        if (node.type == "var_use") {
+            let var_host = dependency[i_var]
+            if (var_host != null) {
+                let content = var_host.get_content(state)
+                res.push(content + " ")
+            }
+            else
+                res.push("*Error*")
+            i_var++
+        }
+        else if (node.type == "literal") {
+            res.push(node.content + " ")
+        }
+        else if (node.type == "sep") {
+            res.push("\n".repeat(node.content_obj))
+        }
+    }
+
+    if (undef.length > 0) {
+        for (let name of undef) {
+            state.add_warning("Variable \"" + name + "\" is not defined")
+        }
+        return [null, dependency]
+    }
+
+    let content = normalize_text(res.join(""))
+
+    return [content, dependency]
 }

@@ -227,13 +227,25 @@ export class parse_node {
         let parent = this.parent
         return parent.children.findIndex((x) => x == this)
     }
-    public get_next_non_sep_sibling() {
+    /**
+     * @returns The first sibling that is not empty (e.g. sep)
+     */
+    public get_next_semantic_sibling() {
         let self_index = this.get_self_index()
         for (let i = self_index + 1; i < this.parent.children.length; i++) {
             if (this.parent.children[i].type == "sep")
                 continue
             else
                 return this.parent.children[i]
+        }
+        return null
+    }
+    public get_first_sementic_child() {
+        for (let child of this.children) {
+            if (child.type == "sep")
+                continue
+            else
+                return child
         }
         return null
     }
