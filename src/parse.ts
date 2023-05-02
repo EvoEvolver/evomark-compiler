@@ -223,7 +223,7 @@ export class parse_node {
         node.parent = this
         return node
     }
-    public set_child_at(node: parse_node, idx: number): parse_node{
+    public set_child_at(node: parse_node, idx: number): parse_node {
         this.children[idx] = node
         node.parent = this
         return node
@@ -254,13 +254,24 @@ export class parse_node {
         }
         return null
     }
-    public remove_self_from_parent(){
+    public remove_self_from_parent() {
         let self_index = this.get_self_index()
         this.parent.children.splice(self_index, 1)
     }
     public add_sibling(node: parse_node): parse_node {
         let self_index = this.get_self_index()
         this.parent.children.splice(self_index + 1, 0, node)
+        node.parent = this.parent
+        return node
+    }
+    public add_older_sibling(node: parse_node, with_sep?: boolean): parse_node {
+        let self_index = this.get_self_index()
+        if (with_sep === true) {
+            let new_sep = new parse_node("sep").set_content_obj(2)
+            this.parent.children.splice(self_index, 0, new_sep)
+            new_sep.parent = this
+        }
+        this.parent.children.splice(self_index, 0, node)
         node.parent = this.parent
         return node
     }

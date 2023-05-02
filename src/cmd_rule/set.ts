@@ -4,6 +4,28 @@ import { parse_node, func_rule } from "../parse";
 import { simple_literal_parser } from "../parser/common";
 import { store_literal_to_host } from "./common";
 
+const inline_length_limit = 100
+
+export function make_set_node(cmd_node: parse_node, var_name: string, input_hash: string, content: any) {
+    cmd_node.children = []
+    // Set variable
+    let var_use_node = cmd_node.push_child("body").set_typesetting_type("inline").push_child("var_use")
+    var_use_node.set_content(var_name)
+
+    // Set hash
+    let hash_node = cmd_node.push_child("param")
+    hash_node.set_content_obj(input_hash)
+
+    // Set cache content
+    let cache_content_node = cmd_node.push_child("body")
+    cache_content_node.children = []
+    cache_content_node.push_child("literal").set_content(content)
+
+    // If it is just one line and short, make the type setting inline
+    cache_content_node.typesetting_type = "block"
+    if (typeof content === "string" && content.indexOf("\n") < 0 && content.length < inline_length_limit)
+        cache_content_node.typesetting_type = "inline"
+}
 
 function set_empty(cmd_node: parse_node, state: exec_state) {
     if (state.last_var_assign == null) {
@@ -19,25 +41,10 @@ function set_empty(cmd_node: parse_node, state: exec_state) {
         cached_res = eval_and_cache(host, state.cache_table)
     }
 
-    // Set variable
-    let var_use_node = cmd_node.push_child("body").set_typesetting_type("inline").push_child("var_use")
     if (host.var_name == null)
         throw Error("Bug!!")
-    var_use_node.set_content(host.var_name)
+    make_set_node(cmd_node, host.var_name, host.input_hash, cached_res)
 
-    // Set hash
-    let hash_node = cmd_node.push_child("param")
-    hash_node.set_content_obj(host.input_hash)
-
-    // Set cache content
-    let cache_content_node = cmd_node.push_child("body")
-    cache_content_node.children = []
-    cache_content_node.push_child("literal").set_content(cached_res)
-
-    // If it is just one line, make the type setting inline
-    cache_content_node.typesetting_type = "block"
-    if (typeof cached_res === "string" && cached_res.indexOf("\n") < 0)
-        cache_content_node.typesetting_type = "inline"
 }
 
 
@@ -81,7 +88,6 @@ function exec(cmd_node: parse_node, state: exec_state, assigned: obj_host) {
     if (!hash_node) {
         state.add_warning("A hash must be provided")
         return
-        //cmd_node.add_child(new parse_node("param")).set_content_obj(host.input_hash)
     }
 
     if (hash_node.type != "param") {
@@ -89,7 +95,7 @@ function exec(cmd_node: parse_node, state: exec_state, assigned: obj_host) {
         return
     }
 
-    if(hash_node.content_obj!=host.input_hash){
+    if (hash_node.content_obj != host.input_hash) {
         // Hash mismatch
         return
     }

@@ -18,7 +18,7 @@ function exec(cmd_node: parse_node, state: exec_state, assigned: obj_host) {
     if(assigned.status==host_type.Undef)
         return
     let content = assigned.get_content(state).trim()
-
+    // TODO
 
 }
 

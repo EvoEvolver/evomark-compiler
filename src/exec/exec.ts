@@ -186,13 +186,9 @@ export class exec_state {
     }
 }
 
-export function get_next_sibling(node: parse_node) {
 
-}
-
-
-export function get_hash(input: string, caller: string) {
-    return spark_hash([caller, "$", input].join(""))
+export function get_hash(input: any, caller: string) {
+    return spark_hash([caller, "$", JSON.stringify(input)].join(""))
 }
 
 export enum host_type {
@@ -251,6 +247,12 @@ export class obj_host {
 
     }
 }
+
+export function eval_without_cache(host: obj_host): any {
+    let res = host.eval_func(host.input)
+    return res
+}
+
 
 export function eval_and_cache(host: obj_host, cache_table: any): any {
     let cached = cache_table[host.input_hash]

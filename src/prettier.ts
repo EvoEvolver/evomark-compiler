@@ -58,7 +58,6 @@ function stringify_core(root: parse_node, indent: number, res: string[]) {
                 stringify_core(node, indent, res)
                 break
             }
-            case "body":
             case "body": {
                 switch (node.typesetting_type) {
                     case "inline":
@@ -78,19 +77,18 @@ function stringify_core(root: parse_node, indent: number, res: string[]) {
                         push_with_indent("}\n", res, indent)
                         break
                     case "direct_child":
-                        let func_node = node.children[0]
-                        if (node.type == "body")
+                        let direct_child_node = node.children[0]
+                        if (direct_child_node.type == "cmd")
                             push_with_indent("$", res, 0)
                         else
                             push_with_indent("#", res, 0)
-                        push_with_indent(func_node.content, res, 0)
-                        stringify_core(func_node, indent, res)
+                        push_with_indent(direct_child_node.content, res, 0)
+                        stringify_core(direct_child_node, indent, res)
                         break
                 }
 
                 break
             }
-            case "param":
             case "param": {
                 res.push("(")
                 res.push(JSON.stringify(node.content_obj))

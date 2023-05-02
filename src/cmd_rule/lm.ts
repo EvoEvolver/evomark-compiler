@@ -1,14 +1,20 @@
 import { evomark_core } from "../core"
-import { exec_state, get_hash, host_type, obj_host } from "../exec/exec";
+import { eval_to_text, exec_state, obj_host } from "../exec/exec";
 import { parse_node, func_rule } from "../parse";
 import { simple_literal_parser } from "../parser/common";
-import { get_first_body_node, set_lazy_variable } from "./common";
+import { get_first_body_node, get_param_body_pairs, set_lazy_variable, set_lazy_variable_with_input } from "./common";
 import { openAiApiKey } from "../secret"
 
 import { Configuration, OpenAIApi } from "openai"
 
 
-async function query_lm_async(prompt: string): Promise<string> {
+async function query_lm_async(input: any): Promise<string> {
+    let prompt = input["prompt"]
+    let suffix = input["suffix"] || null
+    let echo = input["echo"] || ""
+    if(input["echo"]){
+        prompt = [prompt, input["echo"]].join(" ")
+    }
     const configuration = new Configuration({
         apiKey: openAiApiKey,
     });
@@ -19,6 +25,7 @@ async function query_lm_async(prompt: string): Promise<string> {
             model: "text-davinci-003",
             prompt: prompt,
             max_tokens: 2000,
+            suffix: suffix
         });
         console.log(completion.data.choices[0].text);
     } catch (error) {
@@ -29,12 +36,14 @@ async function query_lm_async(prompt: string): Promise<string> {
             console.log(error.message);
         }
     }
-    if(completion)
-        return completion.data.choices[0].text;
+    if (completion) {
+        let res: string = completion.data.choices[0].text
+        return [echo, res.trimStart()].join(" ")
+    }
     return null
 }
 
-function query_lm_sync(input: string): string {
+function query_lm_sync(input: any): string {
     let ans = undefined
     query_lm_async(input).then(result => {
         ans = result
@@ -48,8 +57,25 @@ function query_lm_sync(input: string): string {
 function exec(cmd_node: parse_node, state: exec_state, assigned: obj_host) {
     if (assigned == null)
         return
-    let cmd_body = get_first_body_node(cmd_node)
-    set_lazy_variable(state, cmd_body, assigned, "lm", query_lm_sync)
+    let input = {}
+    let texts = []
+    let param_body_pairs = get_param_body_pairs(cmd_node)
+    for(let [param, body] of param_body_pairs){
+        let [text, dependency] = eval_to_text(body.children, state)
+        texts.push(text)
+    }
+    if(texts.length < 1){
+        state.add_fatal("There must be one body as input")
+        return
+    }
+    input["prompt"] = texts[0]
+    if(texts.length >= 2){
+        input["echo"] = texts[1]
+    }
+    if(texts.length >= 3){
+        input["suffix"] = texts[2]
+    }
+    set_lazy_variable_with_input(state, input, assigned, "lm", query_lm_sync)
 }
 
 export function lm(core: evomark_core) {
