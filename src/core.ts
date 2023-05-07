@@ -42,11 +42,11 @@ export class evomark_core {
         this.register_modules(name, modules)
     }
 
-    public process(src: string, emconfig: any, file_path: string): [string, any] {
-        if (!emconfig) {
-            emconfig = {}
+    public process(src: string, config: any, file_path: string): [string, any] {
+        if (!config) {
+            config = {}
         }
-        let [root, parse_state] = this.parser.parse(src, emconfig)
+        let [root, parse_state] = this.parser.parse(src, config)
         console.log(root.write_tree())
         this.exec(file_path, root, src)
         let [tokens, tokener_state] = this.tokenizer.tokenize(root, parse_state)
@@ -66,7 +66,6 @@ export class evomark_core {
         let exec_state = this.executor.exec(root, ctx)
         let res = stringify(root)
         fs.writeFileSync(file_path + ".ctx.json", JSON.stringify(exec_state.get_ctx()))
-        fs.writeFileSync(file_path + ".bak", old_src)
         fs.writeFileSync(file_path, res)
     }
 

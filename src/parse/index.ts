@@ -10,14 +10,14 @@ export class evomark_parser {
     public func_rules: Record<string, func_parser>
     public cmd_rules: Record<string, func_parser>
 
-    public init_state_config = () => {
-        return {}
-    }
-
     public constructor() {
         this.func_rules = {}
         this.cmd_rules = {}
         this.add_func_rule("box", simple_parser)
+    }
+
+    public init_state_config = () => {
+        return {}
     }
 
     public add_func_rule(name: string, rule: func_parser) {
@@ -37,13 +37,13 @@ export class evomark_parser {
             // Try rules
             if (parse_normal_breaking_literal(src, state, this))
                 continue
-            if (parse_func(src, state, this))
-                continue
-            if (parse_ref_assign(src, state, this))
+            if (parse_cmd(src, state, this))
                 continue
             if (parse_cmd_var(src, state, this))
                 continue
-            if (parse_cmd(src, state, this))
+            if (parse_func(src, state, this))
+                continue
+            if (parse_ref_assign(src, state, this))
                 continue
             if (state.pos == state.end)
                 break
@@ -53,8 +53,8 @@ export class evomark_parser {
         return true
     }
 
-    public parse(src: string, emconfig: any): [parse_node, parse_state] {
-        let state = new parse_state(src, emconfig)
+    public parse(src: string, config: any): [parse_node, parse_state] {
+        let state = new parse_state(src, config)
         state.config = this.init_state_config()
         this.parse_core(src, state)
         return [state.root_node, state]
@@ -90,10 +90,10 @@ export class parse_state {
     public curr_node: parse_node
     public root_node: parse_node
 
-    public constructor(src: string, emconfig: any) {
+    public constructor(src: string, config: any) {
         this.end = src.length
         // Load the global config
-        Object.assign(this.config, emconfig)
+        Object.assign(this.config, config)
         this.curr_node = new parse_node("root")
         this.root_node = this.curr_node
     }
@@ -169,18 +169,6 @@ export class parse_node {
 
     public write: () => string = () => {
         return (this.type + " " + this.content).replaceAll("\n", "\\n")
-    }
-
-    private write_tree_with_level(level: number): string {
-        let indent = " ".repeat(2 * level)
-        let res = []
-        res.push(indent)
-        res.push(this.write())
-        res.push("\n")
-        for (let child of this.children) {
-            res.push(child.write_tree_with_level(level + 1))
-        }
-        return res.join("")
     }
 
     public set_content(content: string): parse_node {
@@ -271,6 +259,18 @@ export class parse_node {
         this.parent.children.splice(self_index, 0, node)
         node.parent = this.parent
         return node
+    }
+
+    private write_tree_with_level(level: number): string {
+        let indent = " ".repeat(2 * level)
+        let res = []
+        res.push(indent)
+        res.push(this.write())
+        res.push("\n")
+        for (let child of this.children) {
+            res.push(child.write_tree_with_level(level + 1))
+        }
+        return res.join("")
     }
 }
 

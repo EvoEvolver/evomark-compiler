@@ -7,4 +7,5 @@ let file_path = args[0]
 let src: string = fs.readFileSync(file_path, {encoding: 'utf8'})
 let core = default_rules()
 let [rendered,] = core.process(src, null, file_path)
+
 console.log(rendered)

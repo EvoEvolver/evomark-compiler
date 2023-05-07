@@ -1,38 +1,42 @@
 #config{
-title = "Hello world"
-title5 = "Hello world"
+  title = "Hello world"
+      title5 = "Hello world"
 }
 
-@adsa = 
+@adsa=
 #box{
-    #list{
-        first
-    }{
-        second
-    }
+  #list{
+    first  
+  }
+  {
+    second  
+  }
+
+  
 }
 
-#figure(irena.jpg){
-    This is irena.
+#figure('irena.jpg'){
+  This is irena.
 }
 
-See #ref{@asds} for detail. 
+See#ref{@asds} for detail.
 
-123 #equ{123} 123
+
+123#equ{123} 123
 
 %a = $def{
-    Hello
+  Hello
 }
 
 #equ{
-    \ket{\phi}
+  \ket{\phi}
 }
 
 %a = $def{
-    Hello
+  Hello
 }
 
 %b = $def{
-    Hello %a
+  Hello %a
 }
 

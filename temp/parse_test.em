@@ -2,12 +2,14 @@
 %site = $def{Gitlab}
 %ctx = $def{}
 
-%a = $lm{In %site , you can find}
+%a = $lm{}{In %site , you can find}
 
-$set{%a}("84a9a3a7ee683257b044f605152f963d"){a wide scope of features and tools that you can use for your projects. You can use version control for easily managing and tracking changes for different versions of your code. You can also access built-in CI/CD (Continuous Integration and Delivery) pipelines for automated building, testing, and deployment of your applications. Gitlab offers integrated issue and project management, as well as powerful code analytics tools that you can use to find and fix issues quickly. Additionally, it has a vast library of integrations including with tools like Slack, and you can use it to create and store private or public repositories and collaborate with other developers.}
+$set{%a}('bfb36c76706079bc76ba5e0fc6ab28b5'){
+  In Gitlab , you can find GitLab is an open-source code collaboration platform that helps developers and IT professionals manage their projects and tasks. On GitLab, developers can easily share code, document their workflows, collaborate on projects, and review code. Additionally, GitLab provides advanced features such as issue tracking, merge requests, and continuous integration & delivery. With GitLab, organizations can securely manage their source code, build and deploy their applications, and manage the full software development lifecycle from one easily accessible place.
+}
 
 $show{%a}{
-  a wide scope of features and tools that you can use for your projects. You can use version control for easily managing and tracking changes for different versions of your code. You can also access built-in CI/CD (Continuous Integration and Delivery) pipelines for automated building, testing, and deployment of your applications. Gitlab offers integrated issue and project management, as well as powerful code analytics tools that you can use to find and fix issues quickly. Additionally, it has a vast library of integrations including with tools like Slack, and you can use it to create and store private or public repositories and collaborate with other developers.
+  In Gitlab , you can find GitLab is an open-source code collaboration platform that helps developers and IT professionals manage their projects and tasks. On GitLab, developers can easily share code, document their workflows, collaborate on projects, and review code. Additionally, GitLab provides advanced features such as issue tracking, merge requests, and continuous integration & delivery. With GitLab, organizations can securely manage their source code, build and deploy their applications, and manage the full software development lifecycle from one easily accessible place.
 }
 
 %sum = $lm{
@@ -17,7 +19,7 @@ $show{%a}{
 }
 
 $show{%sum}{
-  Gitlab provides an extensive range of features, including version control, CI/CD pipelines, issue and project management, code analytics, integrations and private/public repo creation.
+   GitLab is an open-source code collaboration platform that helps developers and IT professionals manage projects, collaborate, review code, and track issues in one place.
 }
 
 %ctx = $def{

@@ -1,5 +1,5 @@
 import {parse_node} from "./parse"
-
+import * as JSON5 from "JSON5"
 
 function push_with_indent(content: string, res: string[], indent: number) {
     res.push("  ".repeat(indent) + content)
@@ -102,7 +102,7 @@ function stringify_core(root: parse_node, indent: number, res: string[]) {
             }
             case "param": {
                 res.push("(")
-                res.push(JSON.stringify(node.content_obj))
+                res.push(JSON5.stringify(node.content_obj))
                 res.push(")")
                 break
             }

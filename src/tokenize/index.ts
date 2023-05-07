@@ -8,11 +8,6 @@ export type func_tokenizer = (root: parse_node, tokens: token[], tokener: evomar
 export class evomark_tokenizer {
 
     public modules: Record<string, any>
-
-    public init_state_config = () => {
-        return {}
-    }
-
     public func_tokeners: Record<string, func_tokenizer>
 
     public constructor() {
@@ -23,6 +18,10 @@ export class evomark_tokenizer {
                 Referred: "@/Referred.vue"
             }
         }
+    }
+
+    public init_state_config = () => {
+        return {}
     }
 
     public add_func_rule(name: string, rule: func_tokenizer) {
@@ -128,13 +127,12 @@ export class tokener_state {
     public ref_table: Record<string, parse_node>
     public used_func: any = {}
     public env: Record<string, any> = {}
+    public available_index = {}
 
     public constructor(parse_state: parse_state) {
         this.ref_table = parse_state.ref_table
         this.config = parse_state.config
     }
-
-    public available_index = {}
 
     public get_available_index(display_name: string): number {
         let index = this.available_index[display_name]
@@ -168,9 +166,9 @@ export class token {
 type html_attr = Record<string, string>
 
 export class tag_token extends token {
-    private tag_type = -1
     public attrs: html_attr
     public pair = null
+    private tag_type = -1
 
     public constructor(tag: string, tag_type: number, attrs: html_attr) {
         super("tag", tag)

@@ -2,24 +2,24 @@ import {parse_node} from "../parse";
 import {hash as spark_hash} from "spark-md5"
 import {normalize_text} from "../utils/normalize";
 
-let type_of_cmd = ["var_use", "cmd", "var_assign"]
+let type_of_exec = ["var_use", "cmd", "var_assign"]
 
 export const special_one_time_cmd = ["warning", "halted_here"]
 
-function get_cmd_list_for_node(node: parse_node, cmd_list: parse_node[]): void {
+function get_exec_list_for_node(node: parse_node, exec_list: parse_node[]): void {
     for (let child of node.children) {
-        if (type_of_cmd.indexOf(child.type) > -1) {
-            cmd_list.push(child)
+        if (type_of_exec.indexOf(child.type) > -1) {
+            exec_list.push(child)
             continue
         }
-        get_cmd_list_for_node(child, cmd_list)
+        get_exec_list_for_node(child, exec_list)
     }
 }
 
-export function get_cmd_list(root: parse_node): parse_node[] {
-    let cmd_list = []
-    get_cmd_list_for_node(root, cmd_list)
-    return cmd_list
+export function get_exec_list(root: parse_node): parse_node[] {
+    let exec_list = []
+    get_exec_list_for_node(root, exec_list)
+    return exec_list
 }
 
 export type exec_rule = (cmd_node: parse_node, state: exec_state, assigned: obj_host) => void
@@ -34,11 +34,9 @@ export class evomark_exec {
     }
 
     public exec(root: parse_node, ctx: any): exec_state {
-        let cache_table = ctx["cache"] || {}
-        let saved = ctx["saved"] || {}
-        let state = new exec_state(cache_table, saved)
-        let cmd_list = get_cmd_list(root)
-        for (let cmd of cmd_list) {
+        let state = new exec_state(ctx || {})
+        let exec_list = get_exec_list(root)
+        for (let cmd of exec_list) {
             switch (cmd.type) {
                 case "var_use": {
                     let host = state.node_to_obj_host(cmd)
@@ -95,7 +93,7 @@ export class evomark_exec {
                     cmd.add_sibling(new parse_node("cmd")).set_content("halted_here")
                 break
             }
-            state.cmd_pos++
+            state.exec_pos++
         }
         return state
     }
@@ -108,8 +106,6 @@ export class exec_state {
     // Store all the cached objects
     // May be read from file. May be saved as cache
     public cache_table: any
-    // Saved variables
-    public saved_var_table: any
     // Name to var_host map
     public host_map: Record<string, obj_host> = {}
     // A rule function might turn this to true and the execution should halt
@@ -118,41 +114,18 @@ export class exec_state {
     public warning_list: string[] = []
     // A number that is different for each cmd in execution
     // Designed for cache salt
-    public cmd_pos: number = 0
+    public exec_pos: number = 0
 
-    public constructor(cache_table: any, saved_var_table: any) {
-        this.cache_table = cache_table || {}
-        this.saved_var_table = saved_var_table || {}
+    public constructor(ctx: any) {
+        this.cache_table = ctx["cache"] || {}
     }
 
     public get_ctx() {
         return {
-            "cache": this.cache_table,
-            "saved": this.saved_var_table
+            "cache": this.cache_table
         }
     }
 
-    public save_var(host: obj_host) {
-        // TODO handle date type
-        if (!host.defined) {
-            this.add_warning("Save failed because the variable is Undef")
-            return
-        }
-        let content_to_save = host.get_content(this)
-        let var_name = host.var_name
-        this.saved_var_table[var_name] = {
-            "t": host.data_type,
-            "v": content_to_save
-        }
-    }
-
-    public load_saved_var(var_name: string) {
-        // TODO handle date type
-        if (var_name in this.saved_var_table) {
-            return this.saved_var_table[var_name]
-        } else
-            return null
-    }
 
     public node_to_obj_host(var_use_node: parse_node): obj_host {
         let var_name = var_use_node.content
@@ -207,8 +180,11 @@ export class obj_host {
     public input_hash = null
     public input: any = null
     public eval_func: (input: any) => any = null
-    private _content: any = null
     public dependency: obj_host[] = []
+    private _content: any = null
+
+    public constructor() {
+    }
 
     public get_content(state: exec_state): any {
         if (this._content == null) {
@@ -242,9 +218,6 @@ export class obj_host {
         if (content != null)
             this.defined = true
         this._content = content
-    }
-
-    public constructor() {
     }
 }
 
