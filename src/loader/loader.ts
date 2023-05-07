@@ -39,13 +39,12 @@ export function load_evomark(file_path: string, input_base: string, output_base:
     }
     try {
         let content: string = fs.readFileSync(file_path, "utf-8")
-        let res = core.process(content, env, file_path)
-        rendered = res[0]
-        page_info = res[1]
+        let proc_state = core.process(content, env, file_path)
+        rendered = proc_state.rendered
     } catch (error) {
         rendered = "<template><pre><code>" + error.message + "\n" + error.stack + "</code></pre></template>"
     }
-    //console.log(rendered)
+
     write_file(output_path, rendered)
     relative_path = relative_path.slice(0, relative_path.lastIndexOf("."))
 

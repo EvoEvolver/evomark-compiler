@@ -12,10 +12,12 @@ export function parse_cmd_breaking_literal(src: string, state: parse_state, pars
     return parse_literal(src, state, parser, cmd_breaking)
 }
 
-const normal_breaking = /[$%#@]/
+export const normal_breaking_chars = "$%#@"
+
+const normal_breaking_regex = new RegExp(`[${normal_breaking_chars}]`)
 
 export function parse_normal_breaking_literal(src: string, state: parse_state, parser: evomark_parser): boolean {
-    return parse_literal(src, state, parser, normal_breaking)
+    return parse_literal(src, state, parser, normal_breaking_regex)
 }
 
 // Space insensitive literal

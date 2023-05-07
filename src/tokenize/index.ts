@@ -5,6 +5,19 @@ import {escapeHtml} from "../utils/html"
 export type func_tokenizer = (root: parse_node, tokens: token[], tokener: evomark_tokenizer, state: tokener_state) => void
 
 
+function tokenize_literal(node: parse_node, tokens: token[]) {
+    let split = node.content.split("\n\n")
+    for(let i=0; i<split.length; i++){
+        tokens.push(get_open_tag("span").set_class("text"))
+        tokens.push(new token("text", split[i]))
+        tokens.push(get_close_tag("span"))
+        if(split[i+1]){
+            tokens.push(new tag_token("br", 0, null))
+        }
+    }
+}
+
+
 export class evomark_tokenizer {
 
     public modules: Record<string, any>
@@ -30,71 +43,78 @@ export class evomark_tokenizer {
         this.func_tokeners[name] = rule
     }
 
-    public tokenize_core(root: parse_node, tokens: token[], state: tokener_state) {
-        for (let node of root.children) {
-            switch (node.type) {
-                case "literal":
-                case "text": {
-                    tokens.push(get_open_tag("span").set_class("text"))
-                    tokens.push(new token("text", node.content))
-                    tokens.push(get_close_tag("span"))
-                    break
-                }
-                case "func": {
-                    let func_name = node.content
-                    let rule = this.func_tokeners[func_name]
-                    state.used_func[func_name] = ""
-                    if (!rule) {
-                        //throw Error("No tokenizer for function " + func_name)
-                        rule = this.func_tokeners["box"]
-                        push_warning("No tokenizer for function " + func_name, tokens)
-                    }
-                    rule(node, tokens, this, state)
-                    break
-                }
-                case "ref": {
-                    let ref_name = node.content
-                    if (!("ref_def" in state.used_func)) {
-                        state.used_func["ref_def"] = ""
-                    }
-                    node.meta["ref_data"] = {id: ref_name, display_name: node.children[0].content}
-                    if (!node.children[0].meta["handle_ref"]) {
-                        let [open, close] = get_tag_pair("Referred")
-                        open.attrs["id"] = ref_name
-                        //open.attrs["func"] = child.children[0].content
-                        tokens.push(open)
-                        this.tokenize_core(node, tokens, state)
-                        tokens.push(close)
-                    } else {
-                        node.children[0].meta["ref_name"] = ref_name
-                        this.tokenize_core(node, tokens, state)
-                    }
-
-                    break
-                }
-                case "var_assign": {
-                    break
-                }
-                case "var_use": {
-                    this.tokenize_core(node, tokens, state)
-                    break
-                }
-                case "cmd": {
-                    break
-                }
-                case "sep": {
-                    if (node.content_obj >= 2 && tokens.at(-1)?.content != "br")
-                        tokens.push(new tag_token("br", 0, null))
-                    break
-                }
-                case "warning": {
-                    push_warning(node.content, tokens)
-                    break
-                }
-                default: {
-                    throw Error("Node of " + node.type + " must be handled by a specific tokenizer")
-                }
+    public tokenize_node(node: parse_node, tokens: token[], state: tokener_state): token[] {
+        switch (node.type) {
+            case "literal":
+            case "text": {
+                tokenize_literal(node, tokens)
+                break
             }
+            case "func": {
+                let func_name = node.content
+                let rule = this.func_tokeners[func_name]
+                state.used_func[func_name] = ""
+                if (!rule) {
+                    //throw Error("No tokenizer for function " + func_name)
+                    rule = this.func_tokeners["box"]
+                    push_warning("No tokenizer for function " + func_name, tokens)
+                }
+                rule(node, tokens, this, state)
+                break
+            }
+            case "ref": {
+                let ref_name = node.content
+                if (!("ref_def" in state.used_func)) {
+                    state.used_func["ref_def"] = ""
+                }
+                node.meta["ref_data"] = {id: ref_name, display_name: node.children[0].content}
+                if (!node.children[0].meta["handle_ref"]) {
+                    let [open, close] = get_tag_pair("Referred")
+                    open.attrs["id"] = ref_name
+                    //open.attrs["func"] = child.children[0].content
+                    tokens.push(open)
+                    this.tokenize_children(node, tokens, state)
+                    tokens.push(close)
+                } else {
+                    node.children[0].meta["ref_name"] = ref_name
+                    this.tokenize_children(node, tokens, state)
+                }
+
+                break
+            }
+            case "dynamic": {
+                this.tokenize_children(node, tokens, state)
+                break
+            }
+            case "var_assign": {
+                break
+            }
+            case "var_use": {
+                this.tokenize_children(node, tokens, state)
+                break
+            }
+            case "cmd": {
+                break
+            }
+            case "sep": {
+                if (node.content_obj >= 2 && tokens.at(-1)?.content != "br")
+                    tokens.push(new tag_token("br", 0, null))
+                break
+            }
+            case "warning": {
+                push_warning(node.content, tokens)
+                break
+            }
+            default: {
+                throw Error("Node of " + node.type + " must be handled by a specific tokenizer")
+            }
+        }
+        return tokens
+    }
+
+    public tokenize_children(root: parse_node, tokens: token[], state: tokener_state) {
+        for (let node of root.children) {
+            this.tokenize_node(node, tokens, state)
         }
         return tokens
     }
@@ -102,7 +122,7 @@ export class evomark_tokenizer {
     public tokenize(root: parse_node, parse_state: parse_state): [token[], tokener_state] {
         let tokens = []
         let state = new tokener_state(parse_state)
-        this.tokenize_core(root, tokens, state)
+        this.tokenize_children(root, tokens, state)
         return [tokens, state]
     }
 
@@ -241,7 +261,7 @@ export function tokenize_box(root: parse_node, tokens: token[], tokener: evomark
     for (let child of root.children) {
         if (child.type == "body") {
             tokens.push(get_open_tag("div"))
-            tokener.tokenize_core(child, tokens, state)
+            tokener.tokenize_children(child, tokens, state)
             tokens.push(get_close_tag("div"))
         }
     }

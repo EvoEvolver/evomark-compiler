@@ -8,6 +8,7 @@ import {retake} from "./retake";
 import {save} from "./save";
 import {set} from "./set";
 import {show} from "./show";
+import {put} from "./put";
 
 export function essential_cmds(core: evomark_core) {
     def(core)
@@ -20,4 +21,6 @@ export function essential_cmds(core: evomark_core) {
     buffer(core)
     init(core)
     retake(core)
+
+    put(core);
 }

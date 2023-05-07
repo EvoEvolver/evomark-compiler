@@ -1,6 +1,6 @@
 #config{
   title = "Hello world"
-      title5 = "Hello world"
+        title5 = "Hello world"
 }
 
 @adsa=
@@ -9,7 +9,7 @@
     first  
   }
   {
-    second  
+      
   }
 
   

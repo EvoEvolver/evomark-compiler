@@ -4,6 +4,7 @@ import {parse_ref_assign} from "./parse_ref"
 import {parse_normal_breaking_literal} from "./parse_text"
 import {simple_parser} from "./common"
 
+export const default_core_rules = [parse_normal_breaking_literal, parse_cmd, parse_cmd_var, parse_func, parse_ref_assign]
 
 export class evomark_parser {
 
@@ -33,24 +34,7 @@ export class evomark_parser {
     }
 
     public parse_core(src: string, state: parse_state): boolean {
-        while (state.pos != state.end) {
-            // Try rules
-            if (parse_normal_breaking_literal(src, state, this))
-                continue
-            if (parse_cmd(src, state, this))
-                continue
-            if (parse_cmd_var(src, state, this))
-                continue
-            if (parse_func(src, state, this))
-                continue
-            if (parse_ref_assign(src, state, this))
-                continue
-            if (state.pos == state.end)
-                break
-            console.log("There is no available rules. Abort.")
-            return false
-        }
-        return true
+        return parse_core_with_rules(src, state, default_core_rules, this)
     }
 
     public parse(src: string, config: any): [parse_node, parse_state] {
@@ -60,6 +44,27 @@ export class evomark_parser {
         return [state.root_node, state]
     }
 }
+
+export function parse_core_with_rules(src: string, state: parse_state, rules, parser: evomark_parser): boolean {
+    while (state.pos != state.end) {
+        // Try rules
+        let succ = false
+        for (let rule of rules) {
+            if (rule(src, state, parser)){
+                succ = true
+                break
+            }
+        }
+        if (succ)
+            continue
+        if (state.pos == state.end)
+            break
+        console.log("There is no available rules. Abort.")
+        return false
+    }
+    return true
+}
+
 
 export var valid_identifier_name_char = /[a-zA-Z0-9_]/
 

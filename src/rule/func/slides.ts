@@ -45,7 +45,7 @@ function tokenize_slides(root: parse_node, tokens: token[], tokener: evomark_tok
     tokens.push(open)
     state.env["slide"] = true
     state.env["clk"] = []
-    tokener.tokenize_core(body, tokens, state)
+    tokener.tokenize_children(body, tokens, state)
     state.env["clk"] = null
     state.env["slide"] = false
     tokens.push(close)
@@ -56,7 +56,7 @@ function tokenize_slide(root: parse_node, tokens: token[], tokener: evomark_toke
     tokens.push(open)
     for (let child of root.children) {
         if (child.type == "body") {
-            tokener.tokenize_core(child, tokens, state)
+            tokener.tokenize_children(child, tokens, state)
         }
     }
     tokens.push(close)
@@ -88,7 +88,7 @@ function tokenize_clk(root: parse_node, tokens: token[], tokener: evomark_tokeni
             open.attrs[":clkIn"] = clk_in.toString()
             state.env["clk"].push(clk_in)
             tokens.push(open)
-            tokener.tokenize_core(child, tokens, state)
+            tokener.tokenize_children(child, tokens, state)
             tokens.push(close)
             break
         }

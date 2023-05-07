@@ -1,0 +1,58 @@
+
+#slides{
+  
+  %p = $def{
+    Characteristics of an Ideal Compiler:
+    - User Interface
+    - Precise and clear diagnostic messages
+    - Easy to use processing options
+    - Correctly implements the entire language
+    - Detects all statically detectable errors
+    - Generates highly optimal code
+    - Compiles quickly using modest system resources
+    - Good software engineering practice
+    - Well modularized, well documented, thoroughly tested, etc.  
+  }
+
+  %s = $lm{
+    Imagine you are a teacher giving a lecture on the following points:
+
+    %p
+
+    In the middle of the class, you are going over the points by explaining each of them and adding examples when it is needed. You should avoid using the same sentence as that in the points.
+    
+    
+    Your script will be:  
+  }
+{Now, let's discuss}
+
+  $set{%s}('de6377dd4c46af7b197fa5f41ac246f1'){
+    Now, let's discuss the features of an ideal compiler. Firstly, an ideal compiler should have an intuitive user interface. Its diagnostic messages should be precise and clear, eliminating the risk of user confusion. The processing options should also be easy to navigate and use.
+    
+    
+    Secondly, the compiler must be able to correctly implement the language specified, without any errors. It must also be able to detect all statically detectable errors, that would otherwise remain undetected.
+    
+    
+    Thirdly, the compiler must generate highly optimized code. Optimization improves the performance of the compiled code but also helps in memory management. Additionally, the compiler should compile quickly and utilize modest system resources.
+    
+    
+    Lastly, relying on good software engineering practices is absolutely essential. The compiler should be well structured and modularized, documented thoroughly and extensively tested prior to its release. Following these essential principles will guarantee a reliable and reliable quality product.  
+  }
+
+  #slide{
+    $put{
+      #list{
+      %p
+      }    
+    }
+
+    #clk#voice{
+      %s    
+    }
+
+      
+  }
+
+  
+}
+

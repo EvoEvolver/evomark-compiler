@@ -18,6 +18,7 @@
     "toml": "^3.0.0"
   },
   "scripts": {
-    "exec": "ts-node src/run/exec.ts"
+    "exec": "ts-node src/run/exec.ts",
+    "load": "ts-node src/run/loader.ts"
   }
 }

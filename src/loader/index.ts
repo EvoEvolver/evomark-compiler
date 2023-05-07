@@ -35,6 +35,7 @@ export function save_ctx(ctx: any, output_base: string) {
 
 const loader_map: Record<string, loader_func> = {
     ".em": load_evomark,
+    ".evo": load_evomark,
     ".jpg": load_asset,
     ".png": load_asset,
     ".gif": load_asset,

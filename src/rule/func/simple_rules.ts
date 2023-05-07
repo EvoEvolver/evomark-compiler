@@ -10,7 +10,7 @@ export function make_simple_rule(func_name: string, tag_name: string) {
         tokens.push(open)
         for (let child of root.children) {
             if (child.type == "body") {
-                tokener.tokenize_core(child, tokens, state)
+                tokener.tokenize_children(child, tokens, state)
             }
         }
         tokens.push(close)

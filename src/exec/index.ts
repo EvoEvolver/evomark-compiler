@@ -1,6 +1,7 @@
 import {parse_node} from "../parse";
 import {hash as spark_hash} from "spark-md5"
 import {normalize_text} from "../utils/normalize";
+import {evomark_core, proc_state} from "../core";
 
 let type_of_exec = ["var_use", "cmd", "var_assign"]
 
@@ -30,14 +31,13 @@ export type exec_rule = (cmd_node: parse_node, state: exec_state, assigned: obj_
 
 export class evomark_exec {
     public exec_rules = {}
-
     public add_rule(name: string, rule_func) {
         if (name in this.exec_rules)
             throw Error("Rule with name " + name + " already in rules")
         this.exec_rules[name] = rule_func
     }
 
-    public exec(root: parse_node, ctx: any): exec_state {
+    public exec(root: parse_node, ctx: any, core: evomark_core, proc_state: proc_state): exec_state {
         let state = new exec_state(ctx || {})
         let exec_list = get_exec_list(root)
         for (let cmd of exec_list) {
@@ -56,7 +56,7 @@ export class evomark_exec {
                         throw Error("Cannot find rule " + cmd.children[0].content)
                     let var_host = new obj_host()
                     var_host.var_name = cmd.content
-                    rule(cmd_node, state, var_host)
+                    rule(cmd_node, state, var_host, core, proc_state)
                     state.last_var_assign = var_host
                     state.host_map[cmd.content] = var_host
                     break
@@ -66,7 +66,7 @@ export class evomark_exec {
                     let rule = this.exec_rules[cmd.content]
                     if (!rule)
                         throw Error("Cannot find rule " + cmd.content)
-                    rule(cmd, state, null)
+                    rule(cmd, state, null, core, proc_state)
                     // There is warning added. We must process
                     if (state.warning_list.length != 0) {
                         let message = state.warning_list.join("\n")

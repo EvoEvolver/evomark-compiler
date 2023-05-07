@@ -39,7 +39,7 @@ function tokenize(root: parse_node, tokens: token[], tokener: evomark_tokenizer,
                 open.attrs["id"] = root.meta.ref_name
                 root.parent.meta["ref_data"].display_name = type + " " + index.toString()
             }
-            tokener.tokenize_core(child, tokens, state)
+            tokener.tokenize_children(child, tokens, state)
             break
         }
     }

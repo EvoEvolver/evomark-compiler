@@ -11,7 +11,7 @@ export function get_pure_literal(cmd_body: parse_node): string {
         } else if (node.type == "sep") {
             res.push("\n".repeat(node.content_obj))
         } else {
-            throw Error("illegle")
+            throw Error("illegal")
         }
     }
     return normalize_text(res.join(""))
