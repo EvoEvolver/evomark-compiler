@@ -2,3 +2,4 @@
 /dist
 /test/*
 /temp/*
+/src/secret.ts

@@ -1,5 +1,5 @@
 import {evomark_core} from "../../core"
-import {eval_to_text, exec_state, get_hash, obj_host} from "../../exec/exec";
+import {eval_to_text, exec_state, get_hash, obj_host} from "../../exec";
 import {parse_node} from "../../parse";
 import {simple_literal_parser} from "../../parse/common";
 import {get_param_body_pairs} from "../utils";

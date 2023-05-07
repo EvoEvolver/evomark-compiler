@@ -1,5 +1,5 @@
 import {evomark_core} from "../../core"
-import {exec_state, obj_host} from "../../exec/exec";
+import {exec_state, obj_host} from "../../exec";
 import {parse_node} from "../../parse";
 import {simple_literal_parser} from "../../parse/common";
 import {get_first_body_node, set_lazy_variable} from "../utils";

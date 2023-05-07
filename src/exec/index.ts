@@ -4,12 +4,16 @@ import {normalize_text} from "../utils/normalize";
 
 let type_of_exec = ["var_use", "cmd", "var_assign"]
 
-export const special_one_time_cmd = ["warning", "halted_here"]
-
 function get_exec_list_for_node(node: parse_node, exec_list: parse_node[]): void {
     for (let child of node.children) {
-        if (type_of_exec.indexOf(child.type) > -1) {
+        let idx = type_of_exec.indexOf(child.type)
+        if (idx > -1) {
             exec_list.push(child)
+            // If child is a cmd or var_assign
+            if(idx >= 1){
+                if(child.meta.exclaim === 2)
+                    child.remove_self_from_parent()
+            }
             continue
         }
         get_exec_list_for_node(child, exec_list)
@@ -59,11 +63,6 @@ export class evomark_exec {
                 }
                 case "cmd": {
                     // We ignore warning from the last execution
-                    if (special_one_time_cmd.indexOf(cmd.content) > -1) {
-                        cmd.remove_self_from_parent()
-                        break
-                    }
-
                     let rule = this.exec_rules[cmd.content]
                     if (!rule)
                         throw Error("Cannot find rule " + cmd.content)
@@ -72,12 +71,16 @@ export class evomark_exec {
                     if (state.warning_list.length != 0) {
                         let message = state.warning_list.join("\n")
                         cmd.add_sibling(new parse_node("cmd"))
-                            .set_content("warning")
+                            .set_content("!!warning")
                             .push_child("body")
                             .push_child("literal")
                             .set_content(message)
                         cmd.add_sibling(new parse_node("sep")).set_content_obj(1)
                         state.warning_list = []
+                    }
+
+                    if (cmd.meta.exclaim == 1) {
+                        cmd.remove_self_from_parent()
                     }
                     break
                 }
@@ -85,12 +88,7 @@ export class evomark_exec {
                     throw Error("bug found")
             }
             if (state.halt_flag) {
-                let sibling = cmd.get_next_semantic_sibling()
-                // Check whether there has already been a label
-                if (sibling?.type == "cmd" && sibling.content == "halted_here")
-                    break
-                else
-                    cmd.add_sibling(new parse_node("cmd")).set_content("halted_here")
+                cmd.add_sibling(new parse_node("cmd")).set_content("!!halted_here")
                 break
             }
             state.exec_pos++

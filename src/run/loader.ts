@@ -1,7 +1,7 @@
 import {load_file} from "../loader";
 import * as path from "path"
 
-var args = process.argv.slice(2)
+let args = process.argv.slice(2)
 let file_path = args[0]
 let input_base = path.resolve(file_path, "..")
 

@@ -1,4 +1,4 @@
-import {exec_state, obj_host} from "../../exec/exec"
+import {exec_state, obj_host} from "../../exec"
 import {parse_node} from "../../parse"
 
 

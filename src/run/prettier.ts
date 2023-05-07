@@ -4,7 +4,7 @@ import {default_rules} from "../rule/default"
 import {stringify} from "../prettier";
 
 let parser = new evomark_parser()
-var args = process.argv.slice(2);
+let args = process.argv.slice(2);
 let file_path = args[0]
 let src: string = fs.readFileSync(file_path, {encoding: 'utf8'})
 let core = default_rules()

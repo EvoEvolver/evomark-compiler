@@ -1,4 +1,4 @@
-import {evomark_exec} from "./exec/exec"
+import {evomark_exec} from "./exec"
 import {evomark_parser, func_parser, parse_node} from "./parse"
 import {stringify} from "./prettier"
 import {evomark_tokenizer, func_tokenizer} from "./tokenize"

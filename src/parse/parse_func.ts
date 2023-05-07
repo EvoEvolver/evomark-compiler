@@ -129,33 +129,50 @@ export function parse_func(src: string, state: parse_state, parser: evomark_pars
 export const parse_func_skeleton = get_parse_skeleton("func", "#")
 
 export function get_parse_skeleton(env_type: string, starter: string) {
-    const param_node_type = "param" // func_body or func_param
-    const body_node_type = "body" // func_body or cmd_body
     function parse(src: string, state: parse_state, parser: evomark_parser): boolean {
         let start = state.pos
         if (start == state.end - 1) {
             return false
         }
 
-        if (src[start] != starter || !valid_identifier_name_char.test(src[start + 1])) {
+        if (src[start] != starter) {
             return false
         }
 
+        // We handle name starting from exclaim
+        let num_exclaim = 0
+        if(src[start + 1]=="!"){
+            num_exclaim = 1
+            state.pos++
+        }
+        // At most two ! are allowed
+        if(src[start + 2]=="!") {
+            num_exclaim = 2
+            state.pos++
+        }
+
         state.pos++
+
+        if(!valid_identifier_name_char.test(src[state.pos])){
+            return false
+        }
+
         let func_name = parse_identifier(src, state)
         let func_node = state.push_node(env_type)
-        func_node.meta["id_delim"] = [start, state.pos]
         func_node.content = func_name
-        state.curr_node = func_node
         func_node.delim = [start]
+        if(starter == "$")
+            func_node.meta["exclaim"] = num_exclaim
+
+        state.curr_node = func_node
 
         while (true) {
             let param_node = parse_param(src, state)
             if (param_node !== null)
-                param_node.type = param_node_type
+                param_node.type = "param"
             let body_node = parse_body(src, state)
             if (body_node !== null)
-                body_node.type = body_node_type
+                body_node.type = "body"
             if ((!param_node) && (!body_node)) {
                 // Grammar sugar
                 // Handle multi func like `#clk#box{}`
@@ -163,7 +180,7 @@ export function get_parse_skeleton(env_type: string, starter: string) {
                 if (src[state.pos] == starter) {
                     let all_param_node = true
                     for (let child of func_node.children) {
-                        if (child.type != param_node_type) {
+                        if (child.type != "param") {
                             all_param_node = false
                             break
                         }
@@ -171,11 +188,11 @@ export function get_parse_skeleton(env_type: string, starter: string) {
                     if (!all_param_node)
                         break
                     // Try to parse following as func
-                    let fake_body_node = new parse_node(body_node_type)
+                    let fake_body_node = new parse_node("body")
                     let func_start_pos = state.pos
                     state.curr_node = fake_body_node
                     if (parse(src, state, parser)) {
-                        let real_body_node = new parse_node(body_node_type)
+                        let real_body_node = new parse_node("body")
                         real_body_node.delim = [func_start_pos, state.pos]
                         //real_body_node.content = src.slice(func_start_pos, state.pos)
                         func_node.add_child(real_body_node)
