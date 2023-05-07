@@ -1,5 +1,5 @@
 import {evomark_core} from "../../core"
-import {evomark_parser, func_rule, is_valid_identifier, parse_node, parse_state} from "../../parser";
+import {evomark_parser,  is_valid_identifier, parse_node, parse_state} from "../../parser";
 import {evomark_tokenizer, get_tag_pair, push_warning, token, tokener_state, tokenize_rule_func} from "../../tokenize";
 
 
@@ -52,8 +52,8 @@ function tokenize(root: parse_node, tokens: token[], tokener: evomark_tokenizer,
 
 export function ref(core: evomark_core) {
 
-    core.parser.add_func_rule(new func_rule("ref", parse))
-    core.tokenizer.add_func_rule(new tokenize_rule_func("ref", tokenize))
+    core.parser.add_func_rule("ref", parse)
+    core.tokenizer.add_func_rule("ref", tokenize)
 
     core.register_modules("ref", {
         "Referring": "@/Referring.vue"

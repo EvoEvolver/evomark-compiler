@@ -1,5 +1,5 @@
 import {evomark_exec} from "./exec/exec"
-import {cmd_rule, evomark_parser, func_parser, func_rule, parse_node} from "./parser"
+import {evomark_parser, func_parser, parse_node} from "./parser"
 import {stringify} from "./prettier"
 import {evomark_tokenizer, func_tokenizer, tokenize_rule_func} from "./tokenize"
 import * as fs from 'fs'
@@ -21,15 +21,15 @@ export class evomark_core {
     }
 
     public add_parse_func(name: string, parse: func_parser) {
-        this.parser.add_func_rule(new func_rule(name, parse))
+        this.parser.add_func_rule(name, parse)
     }
 
     public add_parse_cmd(name: string, parse: func_parser) {
-        this.parser.add_cmd_rule(new cmd_rule(name, parse))
+        this.parser.add_cmd_rule(name, parse)
     }
 
     public add_tokenizer_rule(name: string, tokenize: func_tokenizer) {
-        this.tokenizer.add_func_rule(new tokenize_rule_func(name, tokenize))
+        this.tokenizer.add_func_rule(name, tokenize)
     }
 
     public register_modules(name: string, modules: any) {

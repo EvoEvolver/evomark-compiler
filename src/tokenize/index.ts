@@ -13,11 +13,11 @@ export class evomark_tokenizer {
         return {}
     }
 
-    public func_tokeners: Record<string, tokenize_rule_func>
+    public func_tokeners: Record<string, func_tokenizer>
 
     public constructor() {
         this.func_tokeners = {}
-        this.add_func_rule(new tokenize_rule_func("box", tokenize_box))
+        this.add_func_rule("box", tokenize_box)
         this.modules = {
             ref_def: {
                 Referred: "@/Referred.vue"
@@ -25,10 +25,10 @@ export class evomark_tokenizer {
         }
     }
 
-    public add_func_rule(rule: tokenize_rule_func) {
-        if (rule.name in this.func_tokeners)
+    public add_func_rule(name: string, rule: func_tokenizer) {
+        if (name in this.func_tokeners)
             throw Error("Trying to add a rule of the same name")
-        this.func_tokeners[rule.name] = rule
+        this.func_tokeners[name] = rule
     }
 
     public tokenize_core(root: parse_node, tokens: token[], state: tokener_state) {
@@ -50,7 +50,7 @@ export class evomark_tokenizer {
                         rule = this.func_tokeners["box"]
                         push_warning("No tokenizer for function " + func_name, tokens)
                     }
-                    rule.tokenize(node, tokens, this, state)
+                    rule(node, tokens, this, state)
                     break
                 }
                 case "ref": {

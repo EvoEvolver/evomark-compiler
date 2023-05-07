@@ -1,5 +1,5 @@
 import {evomark_core} from "../../core"
-import {func_rule, parse_node} from "../../parser";
+import { parse_node} from "../../parser";
 import {
     evomark_tokenizer,
     get_close_tag,
@@ -27,7 +27,7 @@ function tokenize(root: parse_node, tokens: token[], tokener: evomark_tokenizer,
 
 export function list(core: evomark_core) {
 
-    core.parser.add_func_rule(new func_rule("list", simple_parser))
-    core.tokenizer.add_func_rule(new tokenize_rule_func("list", tokenize))
+    core.parser.add_func_rule("list", simple_parser)
+    core.tokenizer.add_func_rule("list", tokenize)
 
 }

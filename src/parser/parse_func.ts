@@ -121,7 +121,7 @@ export function parse_func(src: string, state: parse_state, parser: evomark_pars
         console.log("Cannot find rule name " + func_name)
         rule = parser.func_rules["box"]
     }
-    rule.parse(src, state, parser)
+    rule(src, state, parser)
     state.curr_node = func_node.parent
     return true
 }

@@ -7,8 +7,8 @@ import {simple_parser} from "./common"
 
 export class evomark_parser {
 
-    public func_rules: Record<string, func_rule>
-    public cmd_rules: Record<string, cmd_rule>
+    public func_rules: Record<string, func_parser>
+    public cmd_rules: Record<string, func_parser>
 
     public init_state_config = () => {
         return {}
@@ -17,19 +17,19 @@ export class evomark_parser {
     public constructor() {
         this.func_rules = {}
         this.cmd_rules = {}
-        this.add_func_rule(new func_rule("box", simple_parser))
+        this.add_func_rule("box", simple_parser)
     }
 
-    public add_func_rule(rule: func_rule) {
-        if (rule.name in this.func_rules)
-            throw Error("Trying to add a rule of the same name: " + rule.name)
-        this.func_rules[rule.name] = rule
+    public add_func_rule(name: string, rule: func_parser) {
+        if (name in this.func_rules)
+            throw Error("Trying to add a rule of the same name: " + name)
+        this.func_rules[name] = rule
     }
 
-    public add_cmd_rule(rule: cmd_rule) {
-        if (rule.name in this.func_rules)
-            throw Error("Trying to add a rule of the same name: " + rule.name)
-        this.cmd_rules[rule.name] = rule
+    public add_cmd_rule(name: string, rule: func_parser) {
+        if (name in this.func_rules)
+            throw Error("Trying to add a rule of the same name: " + name)
+        this.cmd_rules[name] = rule
     }
 
     public parse_core(src: string, state: parse_state): boolean {
@@ -61,26 +61,6 @@ export class evomark_parser {
         this.parse_core(src, state)
         return [state.root_node, state]
     }
-}
-
-export function parse_sep(src: string, state: parse_state, parser: evomark_parser): void {
-    if (src[state.pos] != "\n")
-        return
-    let n_newline = 0
-    let i = state.pos
-    for (; i < state.end; i++) {
-        if (!(/[\s\n]/.test(src[i]))) {
-            break
-        } else {
-            if (src[i] == "\n")
-                n_newline++
-        }
-    }
-    // Add a new line
-    if (n_newline >= 2)
-        state.push_node("sep")
-    state.pos = i
-
 }
 
 export var valid_identifier_name_char = /[a-zA-Z0-9_]/
@@ -297,23 +277,3 @@ export class parse_node {
 }
 
 export type func_parser = (src: string, state: parse_state, parser: evomark_parser) => void
-
-export class func_rule {
-    public parse: func_parser
-    public name: string
-
-    public constructor(name: string, parse: func_parser) {
-        this.name = name
-        this.parse = parse
-    }
-}
-
-export class cmd_rule {
-    public parse: func_parser
-    public name: string
-
-    public constructor(name: string, parse: func_parser) {
-        this.name = name
-        this.parse = parse
-    }
-}

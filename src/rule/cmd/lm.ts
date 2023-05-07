@@ -1,6 +1,6 @@
 import {evomark_core} from "../../core"
 import {eval_to_text, exec_state, obj_host} from "../../exec/exec";
-import {func_rule, parse_node} from "../../parser";
+import { parse_node} from "../../parser";
 import {simple_literal_parser} from "../../parser/common";
 import {get_param_body_pairs, set_lazy_variable_with_input} from "../utils";
 import {openAiApiKey} from "../../secret"
@@ -79,6 +79,6 @@ function exec(cmd_node: parse_node, state: exec_state, assigned: obj_host) {
 }
 
 export function lm(core: evomark_core) {
-    core.parser.add_cmd_rule(new func_rule("lm", simple_literal_parser))
+    core.parser.add_cmd_rule("lm", simple_literal_parser)
     core.add_exec_rule("lm", exec)
 }

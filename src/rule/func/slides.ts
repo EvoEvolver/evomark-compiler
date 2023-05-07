@@ -1,5 +1,5 @@
 import {evomark_core} from "../../core"
-import {evomark_parser, func_rule, parse_node, parse_state} from "../../parser";
+import {evomark_parser,  parse_node, parse_state} from "../../parser";
 import {
     evomark_tokenizer,
     get_closed_tag,
@@ -119,14 +119,14 @@ function tokenize_voice(root: parse_node, tokens: token[], tokener: evomark_toke
 
 export function slides(core: evomark_core) {
 
-    core.parser.add_func_rule(new func_rule("slides", parse_slides))
-    core.tokenizer.add_func_rule(new tokenize_rule_func("slides", tokenize_slides))
-    core.parser.add_func_rule(new func_rule("slide", simple_parser))
-    core.tokenizer.add_func_rule(new tokenize_rule_func("slide", tokenize_slide))
-    core.parser.add_func_rule(new func_rule("clk", simple_parser))
-    core.tokenizer.add_func_rule(new tokenize_rule_func("clk", tokenize_clk))
-    core.parser.add_func_rule(new func_rule("voice", simple_literal_parser))
-    core.tokenizer.add_func_rule(new tokenize_rule_func("voice", tokenize_voice))
+    core.parser.add_func_rule("slides", parse_slides)
+    core.tokenizer.add_func_rule("slides", tokenize_slides)
+    core.parser.add_func_rule("slide", simple_parser)
+    core.tokenizer.add_func_rule("slide", tokenize_slide)
+    core.parser.add_func_rule("clk", simple_parser)
+    core.tokenizer.add_func_rule("clk", tokenize_clk)
+    core.parser.add_func_rule("voice", simple_literal_parser)
+    core.tokenizer.add_func_rule("voice", tokenize_voice)
 
     core.register_modules("slides", {
         "SlidesBox": "@/slides/SlidesBox.vue",

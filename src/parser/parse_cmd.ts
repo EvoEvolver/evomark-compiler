@@ -74,7 +74,7 @@ export function parse_cmd(src: string, state: parse_state, parser: evomark_parse
     let cmd_node = state.curr_node
     let rule = parser.cmd_rules[cmd_node.content]
     if (rule)
-        rule.parse(src, state, parser)
+        rule(src, state, parser)
     else
         state.push_warning_node_to_root("Cannot find rule for cmd " + cmd_node.content)
     state.pop_curr_node()

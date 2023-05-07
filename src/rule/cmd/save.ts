@@ -1,6 +1,6 @@
 import {evomark_core} from "../../core"
 import {eval_to_text, exec_state, get_hash, obj_host} from "../../exec/exec";
-import {func_rule, parse_node} from "../../parser";
+import { parse_node} from "../../parser";
 import {simple_literal_parser} from "../../parser/common";
 import {get_param_body_pairs} from "../utils";
 
@@ -34,7 +34,7 @@ function exec(cmd_node: parse_node, state: exec_state, assigned: obj_host) {
 }
 
 export function save(core: evomark_core) {
-    core.parser.add_cmd_rule(new func_rule("save", simple_literal_parser))
+    core.parser.add_cmd_rule("save", simple_literal_parser)
     core.add_exec_rule("save", exec)
 }
 
