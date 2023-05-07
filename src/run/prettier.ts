@@ -1,4 +1,4 @@
-import {evomark_parser} from "../parser"
+import {evomark_parser} from "../parse"
 import * as fs from 'fs'
 import {default_rules} from "../rule/default"
 import {stringify} from "../prettier";

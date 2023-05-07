@@ -1,5 +1,5 @@
 import {exec_state, obj_host} from "../../exec/exec"
-import {parse_node} from "../../parser"
+import {parse_node} from "../../parse"
 
 
 function set_empty(cmd_node: parse_node, state: exec_state) {

@@ -1,8 +1,8 @@
 import {evomark_core} from "../../core"
-import {parse_node} from "../../parser";
+import {parse_node} from "../../parse";
 import {evomark_tokenizer, get_tag_pair, token, tokener_state} from "../../tokenize";
 import {renderToString} from "katex"
-import {simple_literal_parser} from "../../parser/common";
+import {simple_literal_parser} from "../../parse/common";
 
 function tokenize(root: parse_node, tokens: token[], tokener: evomark_tokenizer, state: tokener_state) {
     for (let child of root.children) {

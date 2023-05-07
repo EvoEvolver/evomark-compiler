@@ -1,7 +1,7 @@
 import {evomark_core} from "../../core"
-import { parse_node} from "../../parser";
-import {evomark_tokenizer, get_tag_pair, token, tokener_state, tokenize_rule_func} from "../../tokenize";
-import {simple_parser} from "../../parser/common";
+import {parse_node} from "../../parse";
+import {evomark_tokenizer, get_tag_pair, token, tokener_state} from "../../tokenize";
+import {simple_parser} from "../../parse/common";
 
 export function make_simple_rule(func_name: string, tag_name: string) {
 

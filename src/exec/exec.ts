@@ -1,4 +1,4 @@
-import {parse_node} from "../parser";
+import {parse_node} from "../parse";
 import {hash as spark_hash} from "spark-md5"
 import {normalize_text} from "../utils/normalize";
 

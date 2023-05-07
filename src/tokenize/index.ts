@@ -1,4 +1,4 @@
-import {parse_node, parse_state} from "../parser"
+import {parse_node, parse_state} from "../parse"
 import {escapeHtml} from "../utils/html"
 
 
@@ -237,17 +237,6 @@ export function get_close_tag(tag: string) {
 
 export function get_closed_tag(tag: string) {
     return new tag_token(tag, 2, null)
-}
-
-
-export class tokenize_rule_func {
-    public tokenize: func_tokenizer
-    public name: string
-
-    public constructor(name: string, tokenize: func_tokenizer) {
-        this.name = name
-        this.tokenize = tokenize
-    }
 }
 
 export function tokenize_box(root: parse_node, tokens: token[], tokener: evomark_tokenizer, state: tokener_state) {

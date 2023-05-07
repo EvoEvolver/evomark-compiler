@@ -1,6 +1,6 @@
 import {evomark_core} from "../../core"
-import {evomark_parser,  is_valid_identifier, parse_node, parse_state} from "../../parser";
-import {evomark_tokenizer, get_tag_pair, push_warning, token, tokener_state, tokenize_rule_func} from "../../tokenize";
+import {evomark_parser, is_valid_identifier, parse_node, parse_state} from "../../parse";
+import {evomark_tokenizer, get_tag_pair, push_warning, token, tokener_state} from "../../tokenize";
 
 
 function parse(src: string, state: parse_state, parser: evomark_parser) {

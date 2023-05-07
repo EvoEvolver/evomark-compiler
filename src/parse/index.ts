@@ -34,8 +34,6 @@ export class evomark_parser {
 
     public parse_core(src: string, state: parse_state): boolean {
         while (state.pos != state.end) {
-            // Merge multiple \n
-            //parse_sep(src, state, this)
             // Try rules
             if (parse_normal_breaking_literal(src, state, this))
                 continue

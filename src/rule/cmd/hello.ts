@@ -1,7 +1,7 @@
 import {evomark_core} from "../../core"
 import {exec_state, obj_host} from "../../exec/exec";
-import { parse_node} from "../../parser";
-import {simple_literal_parser} from "../../parser/common";
+import {parse_node} from "../../parse";
+import {simple_literal_parser} from "../../parse/common";
 import {get_first_body_node, set_lazy_variable} from "../utils";
 
 
@@ -18,6 +18,6 @@ function exec(cmd_node: parse_node, state: exec_state, assigned: obj_host) {
 }
 
 export function hello(core: evomark_core) {
-    core.parser.add_cmd_rule("hello", simple_literal_parser)
+    core.add_cmd_rule("hello", simple_literal_parser)
     core.add_exec_rule("hello", exec)
 }

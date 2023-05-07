@@ -2,7 +2,7 @@ import {parse as toml_parse} from 'toml'
 import {parse as rjson_parse} from 'relaxed-json'
 import {readFileSync} from "fs"
 import {resolve} from "path"
-import {parse_state} from '../parser'
+import {parse_state} from '../parse'
 
 enum dict_langs {
     json = "json",

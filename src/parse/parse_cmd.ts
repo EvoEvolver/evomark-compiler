@@ -1,5 +1,5 @@
 import {evomark_parser, parse_identifier, parse_node, parse_state} from "./index"
-import {get_parse_skeleton} from "../parser/parse_func"
+import {get_parse_skeleton} from ".//parse_func"
 import {find_next_char} from "./utils"
 
 export function parse_cmd_var_name(src: string, state: parse_state): string {
@@ -46,9 +46,6 @@ export function parse_cmd_var_assign(src: string, state: parse_state, parser: ev
         let cmd_node = parse_cmd(src, state, parser)
         if (cmd_node !== null) {
             // We handle this in the exec phase
-            //var_node.content_obj["result"] = cmd_node.content_obj["result"]
-            //console.log(var_node.content_obj["result"])
-            //state.cmd_exec_state.add_var(var_node)
         }
         if (src.slice(start, cmd_pos).indexOf("\n") < 0)
             var_node.typesetting_type = "one_line"

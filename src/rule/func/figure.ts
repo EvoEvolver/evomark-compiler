@@ -1,5 +1,5 @@
 import {evomark_core} from "../../core"
-import { parse_node} from "../../parser";
+import {parse_node} from "../../parse";
 import {
     evomark_tokenizer,
     get_closed_tag,
@@ -7,10 +7,9 @@ import {
     push_warning,
     token,
     tokener_state,
-    tokenize_box,
-    tokenize_rule_func
+    tokenize_box
 } from "../../tokenize";
-import {simple_parser} from "../../parser/common";
+import {simple_parser} from "../../parse/common";
 
 
 function tokenize(root: parse_node, tokens: token[], tokener: evomark_tokenizer, state: tokener_state) {

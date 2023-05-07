@@ -1,4 +1,4 @@
-import {parse_node} from "../parser";
+import {parse_node} from "../parse";
 
 
 export function get_pure_texts(nodes: parse_node[]): string {

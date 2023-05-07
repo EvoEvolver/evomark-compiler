@@ -1,15 +1,7 @@
 import {evomark_core} from "../../core"
-import {evomark_parser,  parse_node, parse_state} from "../../parser";
-import {
-    evomark_tokenizer,
-    get_closed_tag,
-    get_tag_pair,
-    push_warning,
-    token,
-    tokener_state,
-    tokenize_rule_func
-} from "../../tokenize";
-import {simple_literal_parser, simple_parser} from "../../parser/common";
+import {evomark_parser, parse_node, parse_state} from "../../parse";
+import {evomark_tokenizer, get_closed_tag, get_tag_pair, push_warning, token, tokener_state} from "../../tokenize";
+import {simple_literal_parser, simple_parser} from "../../parse/common";
 import {get_pure_texts} from "../../tokenize/common";
 
 

@@ -1,8 +1,8 @@
 import {evomark_core} from "../../core"
-import {evomark_parser, parse_node, parse_state} from "../../parser";
-import {evomark_tokenizer, token, tokener_state, tokenize_rule_func} from "../../tokenize";
+import {evomark_parser, parse_node, parse_state} from "../../parse";
+import {evomark_tokenizer, token, tokener_state} from "../../tokenize";
 import {parse_dict} from "../../utils/dict";
-import {from_body_wise_parse} from "../../parser/common";
+import {from_body_wise_parse} from "../../parse/common";
 
 export function make_config_rule(func_name: string, namespace: string) {
     function body_wise_parse(src: string, state: parse_state, param: any, parser: evomark_parser): boolean {

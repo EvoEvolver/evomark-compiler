@@ -1,5 +1,5 @@
 import {eval_to_text, exec_state, get_hash, obj_host} from "../../exec/exec"
-import {parse_node} from "../../parser"
+import {parse_node} from "../../parse"
 import {normalize_text} from "../../utils/normalize"
 
 

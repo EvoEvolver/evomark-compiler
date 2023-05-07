@@ -1,4 +1,4 @@
-import {parse_node} from "./parser"
+import {parse_node} from "./parse"
 
 
 function push_with_indent(content: string, res: string[], indent: number) {
