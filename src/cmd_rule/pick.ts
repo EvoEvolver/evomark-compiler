@@ -15,7 +15,7 @@ function exec(cmd_node: parse_node, state: exec_state, assigned: obj_host) {
         return
     let cmd_body = get_first_body_node(cmd_node)
     store_literal_to_host(cmd_body, state, assigned)
-    if(assigned.status==host_type.Undef)
+    if(!assigned.defined)
         return
     let content = assigned.get_content(state).trim()
     // TODO

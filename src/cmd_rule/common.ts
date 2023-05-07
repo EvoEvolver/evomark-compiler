@@ -50,19 +50,13 @@ export function store_literal_to_host(cmd_body: parse_node, state: exec_state, h
     let [text, dependency] = eval_to_text(cmd_body.children, state)
     host.dependency = dependency
     host.set_content(text)
-    if (text == null) {
-        host.status = host_type.Undef
-    }
-    else {
-        host.status = host_type.InDoc
-    }
 }
 
 export function set_lazy_variable_with_input(state: exec_state, input: any, assigned: obj_host, caller_name: string, eval_func: (input: any) => any) {
     let input_hash = get_hash(input, caller_name)
     let cache_in_table = state.read_cache(input_hash)
     assigned.input_hash = input_hash
-    assigned.status = host_type.Lazy
+    assigned.use_cache = true
     assigned.input = input
     assigned.eval_func = eval_func
     if (cache_in_table) {
@@ -73,8 +67,8 @@ export function set_lazy_variable_with_input(state: exec_state, input: any, assi
 export function set_lazy_variable(state: exec_state, input_cmd_body: parse_node, assigned: obj_host, caller_name: string, eval_func: (input: any) => any) {
     let host = new obj_host()
     store_literal_to_host(input_cmd_body, state, host)
-    if (host.status == host_type.Undef) {
-        assigned.status = host_type.Undef
+    if (!host.defined) {
+        assigned.defined = false
         return
     }
     let input = host.get_content(state)
@@ -82,7 +76,7 @@ export function set_lazy_variable(state: exec_state, input_cmd_body: parse_node,
     let cache_in_table = state.read_cache(input_hash)
     assigned.dependency = host.dependency
     assigned.input_hash = input_hash
-    assigned.status = host_type.Lazy
+    assigned.use_cache = true
     assigned.input = input
     assigned.eval_func = eval_func
     if (cache_in_table) {

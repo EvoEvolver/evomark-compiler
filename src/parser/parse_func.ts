@@ -1,5 +1,5 @@
 import { evomark_parser, parse_identifier, parse_node, func_rule, parse_state, valid_identifier_name_char } from "../parse"
-import { find_next_pairing_ignore_quote } from "./utils"
+import { find_next_char, find_next_char_repeat, find_next_pairing_ignore_quote } from "./utils"
 import { parse } from "relaxed-json"
 
 
@@ -36,8 +36,24 @@ export function parse_body(src: string, state: parse_state): parse_node {
     // Trim white space
     while ("\n ".indexOf(src[start]) > -1)
         start++
-    if (src[start] != "{")
+
+    let delim_type = -1
+    if (src[start] == "{") {
+        delim_type = 0
+    }
+    else if (src[start] == "=") {
+        delim_type = 0
+        // Count number of =
+        while (src[start] == "=") {
+            start++
+            delim_type++
+        }
+        if (src[start] != ">")
+            return null
+    }
+    else {
         return null
+    }
     start++
     // Trim white space
     while (src[start] == " ") {
@@ -49,23 +65,53 @@ export function parse_body(src: string, state: parse_state): parse_node {
         start++
         contain_newline = true
     }
-    let next = find_next_pairing_ignore_quote("{", "}", src, start)
-    if (next == -1)
+    let end_delim_start = -1
+    let end_delim_length = 1
+    if (delim_type == 0) {
+        end_delim_start = find_next_pairing_ignore_quote("{", "}", src, start)
+    }
+    else {
+        let end_find_pos = start
+        while (true) {
+            let res = find_next_char_repeat(src, "=", delim_type, end_find_pos, src.length)
+            if (!res){
+                return null
+            }
+            let [next_eq, n_repeat] = res
+            if (src[next_eq + n_repeat] != "|") {
+                end_find_pos = next_eq + n_repeat
+                continue
+            }
+            else {
+                end_delim_length = n_repeat + 1
+                end_find_pos = next_eq
+                break
+            }
+        }
+        end_delim_start = end_find_pos
+    }
+
+    if (end_delim_start == -1)
         return null
     // Trim the spaces and last change line
-    let end = next - 1
-    for (; end >= start; end--) {
-        if(src[end]==" ")
+    let body_end = end_delim_start - 1
+    for (; body_end >= start; body_end--) {
+        if (src[body_end] == " ")
             continue
-        if(src[end]=="\n")
+        if (src[body_end] == "\n")
             break
-        end ++
+        body_end++
         break
     }
     let node = state.push_node("body")
-    node.delim = [start, end]
-    node.typesetting_type = contain_newline ? "block" : "inline"
-    state.pos = next + 1
+    node.delim = [start, body_end]
+    if(delim_type == 0)
+        node.typesetting_type = contain_newline ? "block" : "inline"
+    else{
+        node.typesetting_type = "code"
+        node.meta["_delim"] = [delim_type, end_delim_length-1]
+    }
+    state.pos = end_delim_start + end_delim_length
     return node
 }
 

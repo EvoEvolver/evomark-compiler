@@ -129,7 +129,7 @@ export class exec_state {
     }
     public save_var(host: obj_host) {
         // TODO handle date type
-        if (!host.defined()) {
+        if (!host.defined) {
             this.add_warning("Save failed because the variable is Undef")
             return
         }
@@ -159,15 +159,6 @@ export class exec_state {
             return this.host_map[var_name]
         }
         else {
-            if (var_name in this.saved_var_table) {
-                let saved_entry = this.saved_var_table[var_name]
-                let host = new obj_host()
-                host.status = host_type.Saved
-                host.var_name = var_name
-                host.data_type = saved_entry["t"]
-                host.set_content(saved_entry["v"])
-                return host
-            }
             return null
         }
     }
@@ -199,10 +190,12 @@ export enum host_type {
 }
 
 export class obj_host {
+    public defined: boolean = false
+    public use_cache: boolean = false
     public var_name: string = null
     public data_type = null
-    public status: host_type = host_type.Undef
-    // Content for lazy obj
+    //public status: host_type = host_type.Undef
+    // Content for cached obj
     public input_hash = null
     public input: any = null
     public eval_func: (input: any) => any = null
@@ -210,7 +203,7 @@ export class obj_host {
     public dependency: obj_host[] = []
     public get_content(state: exec_state): any {
         if (this._content == null) {
-            if (this.status == host_type.Lazy) {
+            if (this.use_cache) {
                 let res = eval_and_cache(this, state.cache_table)
                 if (res == null) {
                     this._content == null
@@ -236,15 +229,11 @@ export class obj_host {
         }
     }
     public set_content(content: any) {
+        if(content != null)
+            this.defined = true
         this._content = content
     }
     public constructor() {
-    }
-    public defined() {
-        return this.status != host_type.Undef
-    }
-    public assign_by(source_obj_host) {
-
     }
 }
 
@@ -272,7 +261,7 @@ export function eval_to_text(nodes: parse_node[], state: exec_state): [string, o
             let var_host = state.node_to_obj_host(node)
             if (var_host != null) {
                 dependency.push(var_host)
-                if (var_host.status == host_type.Undef) {
+                if (!var_host.defined) {
                     undef.push(node.content)
                 }
             }

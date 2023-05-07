@@ -16,7 +16,6 @@ function exec(cmd_node: parse_node, state: exec_state, assigned: obj_host) {
         store_literal_to_host(cmd_body, state, assigned)
     else{
         assigned.set_content(host.get_content(state))
-        assigned.status = host_type.InDoc
     }
 }
 

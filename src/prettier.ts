@@ -38,12 +38,12 @@ function get_next_start(root: parse_node, cuur_i: number) {
     return next_start
 }
 
-function change_line(res: string[], state: stringify_state){
+function change_line(res: string[], state: stringify_state) {
 
 }
 
-class stringify_state{
-    
+class stringify_state {
+
 }
 
 function stringify_core(root: parse_node, indent: number, res: string[]) {
@@ -84,6 +84,19 @@ function stringify_core(root: parse_node, indent: number, res: string[]) {
                             push_with_indent("#", res, 0)
                         push_with_indent(direct_child_node.content, res, 0)
                         stringify_core(direct_child_node, indent, res)
+                        break
+                    case "code":
+                        let [start_len, end_len] = node.meta["_delim"]
+                        let starter = "=".repeat(start_len) + ">"
+                        let ender = "=".repeat(end_len) + "|"
+                        if (get_last_char(res) == "\n")
+                            push_with_indent(starter + "\n", res, indent)
+                        else
+                            push_with_indent(starter + "\n", res, 0)
+                        push_with_indent("", res, indent + 1)
+                        stringify_core(node, indent + 1, res)
+                        push_with_indent("\n", res, indent)
+                        push_with_indent("\n" + ender, res, indent)
                         break
                 }
 

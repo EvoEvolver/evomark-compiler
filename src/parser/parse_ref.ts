@@ -1,6 +1,6 @@
 import { evomark_parser, parse_identifier, parse_state } from "../parse";
 import { parse_func } from "./parse_func";
-import { find_next } from "./utils";
+import { find_next_char } from "./utils";
 
 
 export function parse_ref(src: string, state: parse_state): string {
@@ -18,11 +18,11 @@ export function parse_ref_assign(src: string, state: parse_state, parser: evomar
         return false
     let start = state.pos
     let i = state.pos
-    let equal_pos = find_next(src, "=", " ", start, state.end)
+    let equal_pos = find_next_char(src, "=", " ", start, state.end)
     let leagle_def = false
     if (equal_pos > 0) {
         i = equal_pos + 1
-        let func_pos = find_next(src, "#", " \n", i, state.end)
+        let func_pos = find_next_char(src, "#", " \n", i, state.end)
         state.pos = func_pos
         if (func_pos > -1) {
             let ref_node = state.push_node("ref")

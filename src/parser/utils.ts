@@ -31,9 +31,12 @@ export function find_next_pairing_ignore_quote(open: string, close: string, src:
     return -1
 }
 
-export function find_next(src: string, target: string, ignore: string, start: number, end: number): number {
+/**
+ * Only work for target being single character
+ */
+export function find_next_char(src: string, char: string, ignore: string, start: number, end: number): number {
     for (let i = start; i < end; i++) {
-        if (src[i] == target) {
+        if (src[i] == char) {
             return i
         }
         else if (ignore.indexOf(src[i]) > -1) {
@@ -44,4 +47,21 @@ export function find_next(src: string, target: string, ignore: string, start: nu
         }
     }
     return -1
+}
+
+export function find_next_char_repeat(src: string, char: string, minimal_repeat: number, start: number, end: number): [number, number] {
+    for (let i = start; i < end; i++) {
+        if (src[i] == char) {
+            let j: number
+            for (j = i + 1; j < end; j++) {
+                if (src[j] != char) {
+                    break
+                }
+            }
+            if (j - i >= minimal_repeat) {
+                return [i, j - i]
+            }
+        }
+    }
+    return null
 }

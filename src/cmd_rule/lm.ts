@@ -2,7 +2,7 @@ import { evomark_core } from "../core"
 import { eval_to_text, exec_state, obj_host } from "../exec/exec";
 import { parse_node, func_rule } from "../parse";
 import { simple_literal_parser } from "../parser/common";
-import { get_first_body_node, get_param_body_pairs, set_lazy_variable, set_lazy_variable_with_input } from "./common";
+import { get_param_body_pairs, set_lazy_variable_with_input } from "./common";
 import { openAiApiKey } from "../secret"
 
 import { Configuration, OpenAIApi } from "openai"

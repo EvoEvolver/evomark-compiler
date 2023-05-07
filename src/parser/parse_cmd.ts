@@ -1,6 +1,6 @@
 import { evomark_parser, parse_identifier, parse_node, parse_state } from "../parse"
 import { get_parse_skeleton, parse_func_skeleton } from "../parser/parse_func"
-import { find_next } from "./utils"
+import { find_next_char } from "./utils"
 
 export function parse_cmd_var_name(src: string, state: parse_state): string {
     let start = state.pos
@@ -18,7 +18,7 @@ export function parse_cmd_var(src: string, state: parse_state, parser: evomark_p
         return false
     let assign_start = state.pos
     let i = state.pos
-    let equal_pos = find_next(src, "=", " ", assign_start, state.end)
+    let equal_pos = find_next_char(src, "=", " ", assign_start, state.end)
     if (equal_pos > 0) {
         // Case 1: There is a equal sign: var_assign node
         state.pos = equal_pos + 1
@@ -38,7 +38,7 @@ export function parse_cmd_var(src: string, state: parse_state, parser: evomark_p
 
 export function parse_cmd_var_assign(src: string, state: parse_state, parser: evomark_parser, var_name: string): boolean {
     let start = state.pos
-    let cmd_pos = find_next(src, "$", " \n", start, state.end)
+    let cmd_pos = find_next_char(src, "$", " \n", start, state.end)
     if (cmd_pos > -1) {
         state.pos = cmd_pos
         let var_node = state.push_node("var_assign")

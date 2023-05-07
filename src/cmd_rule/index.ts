@@ -3,6 +3,7 @@ import { buffer } from "./buffer";
 import { def } from "./def";
 import { init } from "./init";
 import { lm } from "./lm";
+import { load } from "./load";
 import { retake } from "./retake";
 import { save } from "./save";
 import { set } from "./set";
@@ -15,6 +16,7 @@ export function essential_cmds(core: evomark_core) {
     lm(core)
     set(core)
     save(core)
+    load(core)
     buffer(core)
     init(core)
     retake(core)

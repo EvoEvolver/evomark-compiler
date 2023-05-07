@@ -26,15 +26,7 @@ function exec(cmd_node: parse_node, state: exec_state, assigned: obj_host) {
     if (assigned != null) {
         if (buffered_hash != null) {
             let buffered_content = state.read_cache(buffered_hash)
-            if (buffered_content != null){
-                assigned.set_content(buffered_content)
-                assigned.status = host_type.InDoc
-            }
-            else
-                assigned.status = host_type.Undef
-        }
-        else {
-            assigned.status = host_type.Undef
+            assigned.set_content(buffered_content)
         }
     }
 
