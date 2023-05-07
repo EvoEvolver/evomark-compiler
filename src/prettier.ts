@@ -1,4 +1,4 @@
-import { parse_node } from "./parse"
+import {parse_node} from "./parser"
 
 
 function push_with_indent(content: string, res: string[], indent: number) {
@@ -27,12 +27,10 @@ function get_next_start(root: parse_node, cuur_i: number) {
     if (root.children[cuur_i + 1]) {
         if (root.children[cuur_i + 1].type === "body") {
             next_start = root.children[cuur_i + 1].delim[0] - 1
-        }
-        else {
+        } else {
             next_start = root.children[cuur_i + 1].delim[0]
         }
-    }
-    else {
+    } else {
         next_start = root.delim[1]
     }
     return next_start
@@ -132,8 +130,7 @@ function stringify_core(root: parse_node, indent: number, res: string[]) {
                 if (get_last_char(res) == "\n") {
                     push_with_indent("\n".repeat(1), res, 0)
                     push_with_indent("", res, indent)
-                }
-                else {
+                } else {
                     push_with_indent("\n".repeat(node.content_obj), res, 0)
                     push_with_indent("", res, indent)
                 }

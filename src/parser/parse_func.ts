@@ -1,6 +1,6 @@
-import { evomark_parser, parse_identifier, parse_node, func_rule, parse_state, valid_identifier_name_char } from "../parse"
-import { find_next_char, find_next_char_repeat, find_next_pairing_ignore_quote } from "./utils"
-import { parse } from "relaxed-json"
+import {evomark_parser, parse_identifier, parse_node, parse_state, valid_identifier_name_char} from "./index"
+import {find_next_char_repeat, find_next_pairing_ignore_quote} from "./utils"
+import {parse} from "relaxed-json"
 
 
 export function parse_param(src: string, state: parse_state): parse_node {
@@ -19,11 +19,9 @@ export function parse_param(src: string, state: parse_state): parse_node {
     // Judge the type of the input
     if (param_src.length == 0) {
         node.content_obj = null
-    }
-    else if ("\"\'".indexOf(param_src[0]) > -1 || param_src.indexOf(":") < 0) {
+    } else if ("\"\'".indexOf(param_src[0]) > -1 || param_src.indexOf(":") < 0) {
         node.content_obj = parse([param_src].join(""))
-    }
-    else {
+    } else {
         node.content_obj = parse(["{", param_src, "}"].join(""))
     }
     node.delim = [start, state.pos]
@@ -40,8 +38,7 @@ export function parse_body(src: string, state: parse_state): parse_node {
     let delim_type = -1
     if (src[start] == "{") {
         delim_type = 0
-    }
-    else if (src[start] == "=") {
+    } else if (src[start] == "=") {
         delim_type = 0
         // Count number of =
         while (src[start] == "=") {
@@ -50,8 +47,7 @@ export function parse_body(src: string, state: parse_state): parse_node {
         }
         if (src[start] != ">")
             return null
-    }
-    else {
+    } else {
         return null
     }
     start++
@@ -69,20 +65,18 @@ export function parse_body(src: string, state: parse_state): parse_node {
     let end_delim_length = 1
     if (delim_type == 0) {
         end_delim_start = find_next_pairing_ignore_quote("{", "}", src, start)
-    }
-    else {
+    } else {
         let end_find_pos = start
         while (true) {
             let res = find_next_char_repeat(src, "=", delim_type, end_find_pos, src.length)
-            if (!res){
+            if (!res) {
                 return null
             }
             let [next_eq, n_repeat] = res
             if (src[next_eq + n_repeat] != "|") {
                 end_find_pos = next_eq + n_repeat
-                continue
-            }
-            else {
+
+            } else {
                 end_delim_length = n_repeat + 1
                 end_find_pos = next_eq
                 break
@@ -105,11 +99,11 @@ export function parse_body(src: string, state: parse_state): parse_node {
     }
     let node = state.push_node("body")
     node.delim = [start, body_end]
-    if(delim_type == 0)
+    if (delim_type == 0)
         node.typesetting_type = contain_newline ? "block" : "inline"
-    else{
+    else {
         node.typesetting_type = "code"
-        node.meta["_delim"] = [delim_type, end_delim_length-1]
+        node.meta["_delim"] = [delim_type, end_delim_length - 1]
     }
     state.pos = end_delim_start + end_delim_length
     return node
@@ -189,13 +183,13 @@ export function get_parse_skeleton(env_type: string, starter: string) {
                         real_body_node.typesetting_type = "direct_child"
                     }
                     state.curr_node = func_node
-                }
-                else
+                } else
                     break
             }
         }
         func_node.delim.push(state.pos)
         return true
     }
+
     return parse
 }

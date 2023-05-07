@@ -1,6 +1,6 @@
-import { evomark_parser, parse_identifier, parse_state } from "../parse";
-import { parse_func } from "./parse_func";
-import { find_next_char } from "./utils";
+import {evomark_parser, parse_identifier, parse_state} from "./index";
+import {parse_func} from "./parse_func";
+import {find_next_char} from "./utils";
 
 
 export function parse_ref(src: string, state: parse_state): string {
@@ -34,8 +34,7 @@ export function parse_ref_assign(src: string, state: parse_state, parser: evomar
                 // Add the ref to the ref_table
                 if (ref_name in state.ref_table) {
                     state.push_warning_node("Redefining " + ref_name + "!")
-                }
-                else {
+                } else {
                     state.ref_table[ref_name] = ref_node
                 }
                 leagle_def = true
@@ -43,7 +42,7 @@ export function parse_ref_assign(src: string, state: parse_state, parser: evomar
             state.curr_node = ref_node.parent
         }
     }
-    if(!leagle_def){
+    if (!leagle_def) {
         state.push_warning_node_to_root("\"@" + ref_name + " = \" must be followed with a function")
     }
     return true

@@ -1,6 +1,6 @@
-import { evomark_parser, parse_state } from "../parse"
-import { normalize_text } from "../utils/normalize"
-import { parse_cmd, parse_cmd_var } from "./parse_cmd"
+import {evomark_parser, parse_state} from "./index"
+import {normalize_text} from "../utils/normalize"
+import {parse_cmd, parse_cmd_var} from "./parse_cmd"
 
 function parse_newline(src: string, state: parse_state) {
 

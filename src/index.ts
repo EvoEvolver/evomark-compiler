@@ -1,2 +1,3 @@
-import { evomark_parser } from "./parse"
-export  { evomark_parser }
+import {evomark_parser} from "./parser"
+
+export {evomark_parser}

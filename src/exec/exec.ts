@@ -1,6 +1,6 @@
-import { parse_node } from "../parse";
-import { hash as spark_hash } from "spark-md5"
-import { normalize_text } from "../utils/normalize";
+import {parse_node} from "../parser";
+import {hash as spark_hash} from "spark-md5"
+import {normalize_text} from "../utils/normalize";
 
 let type_of_cmd = ["var_use", "cmd", "var_assign"]
 
@@ -26,11 +26,13 @@ export type exec_rule = (cmd_node: parse_node, state: exec_state, assigned: obj_
 
 export class evomark_exec {
     public exec_rules = {}
+
     public add_rule(name: string, rule_func) {
         if (name in this.exec_rules)
             throw Error("Rule with name " + name + " already in rules")
         this.exec_rules[name] = rule_func
     }
+
     public exec(root: parse_node, ctx: any): exec_state {
         let cache_table = ctx["cache"] || {}
         let saved = ctx["saved"] || {}
@@ -117,16 +119,19 @@ export class exec_state {
     // A number that is different for each cmd in execution
     // Designed for cache salt
     public cmd_pos: number = 0
+
     public constructor(cache_table: any, saved_var_table: any) {
         this.cache_table = cache_table || {}
         this.saved_var_table = saved_var_table || {}
     }
+
     public get_ctx() {
         return {
             "cache": this.cache_table,
             "saved": this.saved_var_table
         }
     }
+
     public save_var(host: obj_host) {
         // TODO handle date type
         if (!host.defined) {
@@ -145,8 +150,7 @@ export class exec_state {
         // TODO handle date type
         if (var_name in this.saved_var_table) {
             return this.saved_var_table[var_name]
-        }
-        else
+        } else
             return null
     }
 
@@ -154,23 +158,27 @@ export class exec_state {
         let var_name = var_use_node.content
         return this.name_to_obj_host(var_name)
     }
+
     public name_to_obj_host(var_name: string): obj_host {
         if (var_name in this.host_map) {
             return this.host_map[var_name]
-        }
-        else {
+        } else {
             return null
         }
     }
+
     public read_cache(hash: string): any {
         return this.cache_table[hash]
     }
+
     public save_cache(hash: string, content: any) {
         this.cache_table[hash] = content
     }
+
     public add_warning(message: string) {
         this.warning_list.push(message)
     }
+
     public add_fatal(message: string) {
         this.warning_list.push(message)
         this.halt_flag = true
@@ -201,6 +209,7 @@ export class obj_host {
     public eval_func: (input: any) => any = null
     private _content: any = null
     public dependency: obj_host[] = []
+
     public get_content(state: exec_state): any {
         if (this._content == null) {
             if (this.use_cache) {
@@ -212,10 +221,10 @@ export class obj_host {
                 return this._content
             }
             return null
-        }
-        else
+        } else
             return this._content
     }
+
     public get_text(state: exec_state): string {
         let content = this.get_content(state)
         switch (this.data_type) {
@@ -228,11 +237,13 @@ export class obj_host {
             }
         }
     }
+
     public set_content(content: any) {
-        if(content != null)
+        if (content != null)
             this.defined = true
         this._content = content
     }
+
     public constructor() {
     }
 }
@@ -264,8 +275,7 @@ export function eval_to_text(nodes: parse_node[], state: exec_state): [string, o
                 if (!var_host.defined) {
                     undef.push(node.content)
                 }
-            }
-            else {
+            } else {
                 undef.push(node.content)
                 dependency.push(null)
             }
@@ -280,15 +290,12 @@ export function eval_to_text(nodes: parse_node[], state: exec_state): [string, o
             if (var_host != null) {
                 let content = var_host.get_content(state)
                 res.push(content + " ")
-            }
-            else
+            } else
                 res.push("*Error*")
             i_var++
-        }
-        else if (node.type == "literal") {
+        } else if (node.type == "literal") {
             res.push(node.content + " ")
-        }
-        else if (node.type == "sep") {
+        } else if (node.type == "sep") {
             res.push("\n".repeat(node.content_obj))
         }
     }

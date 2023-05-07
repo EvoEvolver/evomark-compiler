@@ -1,4 +1,4 @@
-import { load_file } from "../loader/index";
+import {load_file} from "../loader/index";
 import * as path from "path"
 
 var args = process.argv.slice(2)

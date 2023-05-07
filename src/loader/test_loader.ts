@@ -1,4 +1,4 @@
-import { compile_all } from ".";
+import {compile_all} from ".";
 
 let input_base = "/Users/zijian/Documents/GitHub/evomark-compiler/test/test_project"
 

@@ -1,8 +1,8 @@
 import * as dir from "node-dir"
-import { is_forbidden_path, write_file } from './helper'
+import {is_forbidden_path, write_file} from './helper'
 import * as path from 'path'
 import * as fs from 'fs'
-import { load_asset, load_config, load_evomark, loader_func } from "./loader";
+import {load_asset, load_config, load_evomark, loader_func} from "./loader";
 
 export function compile_all(src_path: string, input_base: string, output_base: string) {
     let ctx = {}
@@ -11,7 +11,7 @@ export function compile_all(src_path: string, input_base: string, output_base: s
     dir.files(src_path,
         function (err: any, files: string[]) {
             if (err) throw err;
-            files.forEach((filepath: string)=>{
+            files.forEach((filepath: string) => {
                 console.log(filepath)
                 if (is_forbidden_path(filepath)) {
                     return
@@ -23,14 +23,14 @@ export function compile_all(src_path: string, input_base: string, output_base: s
         });
 }
 
-export function test_and_create_emconfig(input_base: string, output_base: string){
-    if(!fs.existsSync(path.join(input_base, "emconfig.toml"))){
+export function test_and_create_emconfig(input_base: string, output_base: string) {
+    if (!fs.existsSync(path.join(input_base, "emconfig.toml"))) {
         write_file(path.join(output_base, "pages", "emconfig.json"), "{}")
     }
 }
 
-export function save_ctx(ctx: any, output_base: string){
-    write_file(output_base+"/pages/emctx.json", JSON.stringify(ctx))
+export function save_ctx(ctx: any, output_base: string) {
+    write_file(output_base + "/pages/emctx.json", JSON.stringify(ctx))
 }
 
 const loader_map: Record<string, loader_func> = {

@@ -1,7 +1,7 @@
-import { evomark_exec } from "./exec/exec"
-import { cmd_rule, evomark_parser, func_parser, func_rule, parse_node } from "./parse"
-import { stringify } from "./prettier"
-import { evomark_tokenizer, func_tokenizer, tokener_state, tokenize_rule_func } from "./tokenize"
+import {evomark_exec} from "./exec/exec"
+import {cmd_rule, evomark_parser, func_parser, func_rule, parse_node} from "./parser"
+import {stringify} from "./prettier"
+import {evomark_tokenizer, func_tokenizer, tokenize_rule_func} from "./tokenize"
 import * as fs from 'fs'
 
 export class evomark_core {
@@ -56,12 +56,11 @@ export class evomark_core {
     public exec(file_path: string, root: parse_node, old_src: string) {
         let ctx: any
         if (fs.existsSync(file_path + ".ctx.json")) {
-            let json_raw = fs.readFileSync(file_path + ".ctx.json", { encoding: 'utf8' })
+            let json_raw = fs.readFileSync(file_path + ".ctx.json", {encoding: 'utf8'})
             if (json_raw.trim().length == 0)
                 json_raw = "{}"
             ctx = JSON.parse(json_raw)
-        }
-        else {
+        } else {
             ctx = {}
         }
         let exec_state = this.executor.exec(root, ctx)

@@ -1,5 +1,5 @@
-import { evomark_parser, func_parser, parse_node, parse_state } from "../parse"
-import { parse_literal, parse_literal_with_cmd } from "./parse_text"
+import {evomark_parser, func_parser, parse_state} from "./index"
+import {parse_literal_with_cmd} from "./parse_text"
 
 
 type body_wise_parse = (src: string, state: parse_state, param: any, parser: evomark_parser) => void
@@ -20,6 +20,7 @@ export function from_body_wise_parse(body_wise_parse: body_wise_parse): func_par
             }
         }
     }
+
     return parse
 }
 
