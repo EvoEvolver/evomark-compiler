@@ -5,17 +5,6 @@ import {simple_literal_parser, simple_parser} from "../../parse/common";
 import {get_pure_texts} from "../../tokenize/common";
 
 
-function parse_slides(src: string, state: parse_state, parser: evomark_parser) {
-    simple_parser(src, state, parser)
-    for (let child of state.curr_node.children) {
-        if (child.type != "text") {
-            if (child.type == "func" && child.content != "slide") {
-                state.push_warning_node_to_root("Only #slide is allowed in #slides")
-            }
-        }
-    }
-}
-
 function tokenize_slides(root: parse_node, tokens: token[], tokener: evomark_tokenizer, state: tokener_state) {
     if (root.children.length == 0) {
         push_warning("#slides must have body", tokens)
@@ -45,7 +34,13 @@ function tokenize_slides(root: parse_node, tokens: token[], tokener: evomark_tok
     tokens.push(open)
     state.env["slide"] = true
     state.env["clk"] = []
-    tokener.tokenize_children(body, tokens, state)
+    for(let child of body.children){
+        if(child.type == "func" && child.content != "slide"){
+            push_warning("Only #slide is allowed in #slides", tokens)
+            continue
+        }
+        tokener.tokenize_node(child, tokens, state)
+    }
     state.env["clk"] = null
     state.env["slide"] = false
     tokens.push(close)
@@ -111,7 +106,7 @@ function tokenize_voice(root: parse_node, tokens: token[], tokener: evomark_toke
 
 export function slides(core: evomark_core) {
 
-    core.parser.add_func_rule("slides", parse_slides)
+    core.parser.add_func_rule("slides", simple_parser)
     core.tokenizer.add_func_rule("slides", tokenize_slides)
     core.parser.add_func_rule("slide", simple_parser)
     core.tokenizer.add_func_rule("slide", tokenize_slide)

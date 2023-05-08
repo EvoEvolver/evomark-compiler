@@ -101,6 +101,10 @@ export class evomark_tokenizer {
                     tokens.push(new tag_token("br", 0, null))
                 break
             }
+            case "fragment": {
+                this.tokenize_children(node, tokens, state)
+                break
+            }
             case "warning": {
                 push_warning(node.content, tokens)
                 break

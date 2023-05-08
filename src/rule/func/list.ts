@@ -16,14 +16,22 @@ function tokenize(root: parse_node, tokens: token[], tokener: evomark_tokenizer,
     }
     if(!body)
         return
-    let [open, close] = get_tag_pair("ul")
-    tokens.push(open)
+
     let has_prev_list = false
+    let prev_level = 0
     for(let child of body.children){
         if(child.type == "literal" && child.meta["list_starter"] === true){
             if(has_prev_list) {
                 tokens.push(get_close_tag("li"))
             }
+            let level = child.content.length
+            for(let i = 0; i < prev_level - level; i++){
+                tokens.push(get_close_tag("ul"))
+            }
+            for(let i = 0; i < level - prev_level; i++){
+                tokens.push(get_open_tag("ul"))
+            }
+            prev_level = level
             tokens.push(get_open_tag("li"))
             has_prev_list = true
         }
@@ -34,7 +42,9 @@ function tokenize(root: parse_node, tokens: token[], tokener: evomark_tokenizer,
     if(has_prev_list) {
         tokens.push(get_close_tag("li"))
     }
-    tokens.push(close)
+    for(let i = 0; i < prev_level; i++){
+        tokens.push(get_close_tag("ul"))
+    }
 }
 
 
@@ -42,6 +52,7 @@ function parse_stick(src: string, state: parse_state, parser: evomark_parser): b
     if(list_starter.indexOf(src[state.pos]) < 0){
         return false
     }
+    let starter = src[state.pos]
     let num_space = 0
     for(let i = state.pos-1; i > state.start; i--){
         if(src[i] == " "){
@@ -59,10 +70,19 @@ function parse_stick(src: string, state: parse_state, parser: evomark_parser): b
         }
     }
     // We find it's a stick with a new line before it
-    let list_node = state.push_node("literal").set_content(src[state.pos])
+    let level = 1
+    for(let i = state.pos+1; i < src.length; i++){
+        if(src[i] == starter){
+            level++
+        }
+        else{
+            break
+        }
+    }
+    let list_node = state.push_node("literal").set_content(src[state.pos].repeat(level))
     list_node.meta["list_starter"] = true
     list_node.meta["num_space"] = num_space
-    state.pos++
+    state.pos += level
     return true
 }
 

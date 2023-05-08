@@ -20,13 +20,28 @@ function exec(cmd_node: parse_node, state: exec_state, assigned: obj_host) {
         state.add_fatal("There must be one body as input")
         return
     }
+    let has_undefined = false
     input["prompt"] = texts[0]
+    if(texts[0] == null){
+        has_undefined = true
+    }
     if (texts.length >= 2) {
         input["echo"] = texts[1]
+        if(texts[1] == null){
+            has_undefined = true
+        }
     }
     if (texts.length >= 3) {
         input["suffix"] = texts[2]
+        if(texts[2] == null){
+            has_undefined = true
+        }
     }
+    if(has_undefined){
+        state.add_fatal("There must be no undefined input")
+        return
+    }
+    assigned.defined = true
     set_lazy_variable_with_input(state, input, assigned, "lm", query_lm_sync)
 }
 

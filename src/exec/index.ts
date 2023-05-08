@@ -9,12 +9,14 @@ function get_exec_list_for_node(node: parse_node, exec_list: parse_node[]): void
     for (let child of node.children) {
         let idx = type_of_exec.indexOf(child.type)
         if (idx > -1) {
-            exec_list.push(child)
             // If child is a cmd or var_assign
             if(idx >= 1){
-                if(child.meta.exclaim === 2)
+                if(child.meta.exclaim === 2){
                     child.remove_self_from_parent()
+                    continue
+                }
             }
+            exec_list.push(child)
             continue
         }
         get_exec_list_for_node(child, exec_list)
@@ -46,7 +48,7 @@ export class evomark_exec {
                     let host = state.node_to_obj_host(cmd)
                     if (host == null)
                         throw Error("Undefined variable %" + cmd.content)
-                    cmd.add_child(new parse_node("literal")).set_content(host.get_content(state))
+                    cmd.add_sibling(new parse_node("literal")).set_content(host.get_content(state)).make_dynamic()
                     break
                 }
                 case "var_assign": {
@@ -189,9 +191,11 @@ export class obj_host {
             if (this.use_cache) {
                 let res = eval_and_cache(this, state.cache_table)
                 if (res == null) {
-                    this._content == null
+                    this._content = null
                 }
-                this._content = res
+                else {
+                    this._content = res
+                }
                 return this._content
             }
             return null
@@ -245,6 +249,11 @@ export function eval_to_text(nodes: parse_node[], state: exec_state): [string, o
                 dependency.push(var_host)
                 if (!var_host.defined) {
                     undef.push(node.content)
+                    continue
+                }
+                if(var_host.get_content(state) == null){
+                    undef.push(node.content)
+                    continue
                 }
             } else {
                 undef.push(node.content)

@@ -167,6 +167,7 @@ export class parse_node {
     public content_obj: any = null
     public meta: any = {}
     public is_garbage = false
+    public is_dynamic = false
 
     public constructor(type: string) {
         this.type = type
@@ -174,6 +175,11 @@ export class parse_node {
 
     public write: () => string = () => {
         return (this.type + " " + this.content).replaceAll("\n", "\\n")
+    }
+
+    public make_dynamic() {
+        this.is_dynamic = true
+        return this
     }
 
     public set_content(content: string): parse_node {
