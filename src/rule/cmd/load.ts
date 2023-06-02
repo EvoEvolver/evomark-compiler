@@ -5,7 +5,7 @@ import {simple_literal_parser} from "../../parse/common";
 import {get_param_body_pairs} from "../utils";
 
 
-function exec(cmd_node: parse_node, state: exec_state, assigned: obj_host) {
+async function exec(cmd_node: parse_node, state: exec_state, assigned: obj_host) {
     if (assigned == null) {
         state.add_fatal("There should be an assigned variable")
         return
@@ -18,7 +18,7 @@ function exec(cmd_node: parse_node, state: exec_state, assigned: obj_host) {
     let i = 0
     let key: string
     for (let [param, body] of param_body_pairs) {
-        let [text, dependency] = eval_to_text(body.children, state)
+        let {text, dependency} = await eval_to_text(body.children, state)
         if (i == 0) {
             key = text
         }

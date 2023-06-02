@@ -48,7 +48,7 @@ function set_empty(cmd_node: parse_node, state: exec_state) {
 }
 
 
-function exec(cmd_node: parse_node, state: exec_state, assigned: obj_host) {
+async function exec(cmd_node: parse_node, state: exec_state, assigned: obj_host) {
     if (assigned != null) {
         state.add_warning("The first child must be a body with a var inside")
         return
@@ -111,9 +111,9 @@ function exec(cmd_node: parse_node, state: exec_state, assigned: obj_host) {
     }
 
     let content_host = new obj_host()
-    store_literal_to_host(cache_content_node, state, content_host)
+    await store_literal_to_host(cache_content_node, state, content_host)
     if (content_host.defined) {
-        let in_doc_cached_content = content_host.get_content(state)
+        let in_doc_cached_content = await content_host.get_content(state)
         state.save_cache(host.input_hash, in_doc_cached_content)
         host.set_content(in_doc_cached_content)
     }

@@ -11,7 +11,7 @@ function set_empty(cmd_node: parse_node, state: exec_state) {
 }
 
 
-function exec(cmd_node: parse_node, state: exec_state, assigned: obj_host) {
+async function exec(cmd_node: parse_node, state: exec_state, assigned: obj_host) {
     if (assigned != null) {
         state.add_fatal("There should not be an assigned variable")
         return
@@ -27,7 +27,7 @@ function exec(cmd_node: parse_node, state: exec_state, assigned: obj_host) {
     let [host, param, tail] = res
     let result_node = new parse_node("body")
     result_node.add_child(new parse_node("literal"))
-        .set_content(host.get_content(state))
+        .set_content(await host.get_text(state))
     cmd_node.set_child_at(result_node, tail)
 }
 

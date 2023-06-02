@@ -9,11 +9,12 @@ import {save} from "./save";
 import {set} from "./set";
 import {show} from "./show";
 import {put} from "./put";
+import {hello} from "./hello";
 
 export function essential_cmds(core: evomark_core) {
     def(core)
     show(core)
-    //hello(core)
+    hello(core)
     lm(core)
     set(core)
     save(core)

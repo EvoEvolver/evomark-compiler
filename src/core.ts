@@ -42,20 +42,20 @@ export class evomark_core {
         this.register_modules(name, modules)
     }
 
-    public process(src: string, config: any, file_path: string): proc_state {
+    public async process(src: string, config: any, file_path: string): Promise<proc_state> {
         if (!config) {
             config = {}
         }
         let [root, parse_state] = this.parser.parse(src, config)
         let proc_state = get_proc_state_from_parse(parse_state, root)
-        this.exec(file_path, root, proc_state)
+        await this.exec(file_path, root, proc_state)
         let [tokens, tokener_state] = this.tokenizer.tokenize(root, parse_state)
-        let [rendered,page_env] = this.process_tokens(tokens, tokener_state)
+        let [rendered, page_env] = this.process_tokens(tokens, tokener_state)
         proc_state.rendered = rendered
         return proc_state
     }
 
-    public exec(file_path: string, root: parse_node, proc_state: proc_state) {
+    public async exec(file_path: string, root: parse_node, proc_state: proc_state) {
         let ctx: any
         if (fs.existsSync(file_path + ".ctx.json")) {
             let json_raw = fs.readFileSync(file_path + ".ctx.json", {encoding: 'utf8'})
@@ -65,7 +65,7 @@ export class evomark_core {
         } else {
             ctx = {}
         }
-        let exec_ctx = this.executor.exec(root, ctx, this, proc_state)
+        let exec_ctx = await this.executor.exec(root, ctx, this, proc_state)
         let res = stringify(root)
         fs.writeFileSync(file_path + ".ctx.json", JSON.stringify(exec_ctx.get_ctx()))
         fs.writeFileSync(file_path, res)

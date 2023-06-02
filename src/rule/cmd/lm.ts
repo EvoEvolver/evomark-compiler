@@ -2,18 +2,16 @@ import {evomark_core} from "../../core"
 import {eval_to_text, exec_state, obj_host} from "../../exec";
 import {parse_node} from "../../parse";
 import {simple_literal_parser} from "../../parse/common";
-import {get_param_body_pairs, set_lazy_variable_with_input} from "../utils";
-import {query_lm_sync} from "../../model/language/openai";
+import {get_param_body_pairs, set_cached_obj_with_eval} from "../utils";
+import {query_lm_async} from "../../model/language/openai";
 
 
-function exec(cmd_node: parse_node, state: exec_state, assigned: obj_host) {
-    if (assigned == null)
-        return
+async function exec(cmd_node: parse_node, state: exec_state) {
     let input = {}
     let texts = []
     let param_body_pairs = get_param_body_pairs(cmd_node)
     for (let [, body] of param_body_pairs) {
-        let [text] = eval_to_text(body.children, state)
+        let {text} = await eval_to_text(body.children, state)
         texts.push(text)
     }
     if (texts.length < 1) {
@@ -22,27 +20,29 @@ function exec(cmd_node: parse_node, state: exec_state, assigned: obj_host) {
     }
     let has_undefined = false
     input["prompt"] = texts[0]
-    if(texts[0] == null){
+    if (texts[0] == null) {
         has_undefined = true
     }
     if (texts.length >= 2) {
         input["echo"] = texts[1]
-        if(texts[1] == null){
+        if (texts[1] == null) {
             has_undefined = true
         }
     }
     if (texts.length >= 3) {
         input["suffix"] = texts[2]
-        if(texts[2] == null){
+        if (texts[2] == null) {
             has_undefined = true
         }
     }
-    if(has_undefined){
+    if (has_undefined) {
         state.add_fatal("There must be no undefined input")
         return
     }
+    let assigned = new obj_host()
     assigned.defined = true
-    set_lazy_variable_with_input(state, input, assigned, "lm", query_lm_sync)
+    set_cached_obj_with_eval(state, input, assigned, "lm", query_lm_async)
+    return assigned
 }
 
 export function lm(core: evomark_core) {

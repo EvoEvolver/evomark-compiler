@@ -2,6 +2,9 @@ import {parse_node} from "../parse";
 import {hash as spark_hash} from "spark-md5"
 import {normalize_text} from "../utils/normalize";
 import {evomark_core, proc_state} from "../core";
+import * as util from "util";
+import {isStringObject} from "util/types";
+import {isString} from "util";
 
 let type_of_exec = ["var_use", "cmd", "var_assign"]
 
@@ -39,58 +42,70 @@ export class evomark_exec {
         this.exec_rules[name] = rule_func
     }
 
-    public exec(root: parse_node, ctx: any, core: evomark_core, proc_state: proc_state): exec_state {
+    public async exec_cmd(cmd: parse_node, state: exec_state, core: evomark_core, proc_state: proc_state){
+        let rule = this.exec_rules[cmd.content]
+        if (!rule)
+            throw Error("Cannot find rule " + cmd.content)
+        let return_value
+        if (util.types.isAsyncFunction(rule))
+            return_value = await rule(cmd, state, null, core, proc_state)
+        else
+            return_value = rule(cmd, state, null, core, proc_state)
+
+        // There is warning added. We must process
+        if (state.warning_list.length != 0) {
+            let message = state.warning_list.join("\n")
+            cmd.add_sibling(new parse_node("cmd"))
+                .set_content("!!warning")
+                .push_child("body")
+                .push_child("literal")
+                .set_content(message)
+            cmd.add_sibling(new parse_node("sep")).set_content_obj(1)
+            state.warning_list = []
+        }
+
+        if (cmd.meta.exclaim == 1) {
+            cmd.remove_self_from_parent()
+        }
+        return return_value
+    }
+
+    public async exec(root: parse_node, ctx: any, core: evomark_core, proc_state: proc_state): Promise<exec_state> {
         let state = new exec_state(ctx || {})
         let exec_list = get_exec_list(root)
-        for (let cmd of exec_list) {
-            switch (cmd.type) {
+        for (let exec_node of exec_list) {
+            switch (exec_node.type) {
                 case "var_use": {
-                    let host = state.node_to_obj_host(cmd)
+                    let host = state.node_to_obj_host(exec_node)
                     if (host == null)
-                        throw Error("Undefined variable %" + cmd.content)
-                    cmd.add_sibling(new parse_node("literal")).set_content(host.get_content(state)).make_dynamic()
+                        throw Error("Undefined variable %" + exec_node.content)
+                    exec_node.add_sibling(new parse_node("literal")).set_content(await host.get_text(state)).make_dynamic()
                     break
                 }
                 case "var_assign": {
-                    let cmd_node = cmd.children[0]
-                    let rule = this.exec_rules[cmd_node.content]
-                    if (!rule)
-                        throw Error("Cannot find rule " + cmd.children[0].content)
-                    let var_host = new obj_host()
-                    var_host.var_name = cmd.content
-                    rule(cmd_node, state, var_host, core, proc_state)
+                    let cmd_node = exec_node.children[0]
+                    let var_host
+                    var_host = await this.exec_cmd(cmd_node, state, core, proc_state)
+                    if(var_host == null){
+                        var_host = new obj_host()
+                    }
+                    else{
+                        var_host.var_name = exec_node.content
+                    }
                     state.last_var_assign = var_host
-                    state.host_map[cmd.content] = var_host
+                    state.host_map[exec_node.content] = var_host
                     break
                 }
                 case "cmd": {
-                    // We ignore warning from the last execution
-                    let rule = this.exec_rules[cmd.content]
-                    if (!rule)
-                        throw Error("Cannot find rule " + cmd.content)
-                    rule(cmd, state, null, core, proc_state)
-                    // There is warning added. We must process
-                    if (state.warning_list.length != 0) {
-                        let message = state.warning_list.join("\n")
-                        cmd.add_sibling(new parse_node("cmd"))
-                            .set_content("!!warning")
-                            .push_child("body")
-                            .push_child("literal")
-                            .set_content(message)
-                        cmd.add_sibling(new parse_node("sep")).set_content_obj(1)
-                        state.warning_list = []
-                    }
-
-                    if (cmd.meta.exclaim == 1) {
-                        cmd.remove_self_from_parent()
-                    }
+                    await this.exec_cmd(exec_node, state, core, proc_state)
                     break
                 }
                 default:
                     throw Error("bug found")
             }
             if (state.halt_flag) {
-                cmd.add_sibling(new parse_node("cmd")).set_content("!!halted_here")
+                exec_node.add_sibling(new parse_node("cmd")).set_content("!!halted_here")
+                exec_node.add_sibling(new parse_node("sep")).set_content_obj(1)
                 break
             }
             state.exec_pos++
@@ -144,7 +159,7 @@ export class exec_state {
         return this.cache_table[hash]
     }
 
-    public save_cache(hash: string, content: any) {
+    public save_cache(hash: string, content: cnt) {
         this.cache_table[hash] = content
     }
 
@@ -159,8 +174,8 @@ export class exec_state {
 }
 
 
-export function get_hash(input: any, caller: string) {
-    return spark_hash([caller, "$", JSON.stringify(input)].join(""))
+export function get_hash(input: any, caller_salt: string) {
+    return spark_hash([caller_salt, "$", JSON.stringify(input)].join(""))
 }
 
 export enum host_type {
@@ -170,26 +185,40 @@ export enum host_type {
     Saved
 }
 
+export type cnt = obj | string
+
+export class obj{
+    public type: string
+    public content: any
+    public constructor(type, content){
+        this.type = type
+        this.content = content
+    }
+}
+
 export class obj_host {
     public defined: boolean = false
-    public use_cache: boolean = false
     public var_name: string = null
-    public data_type = null
-    //public status: host_type = host_type.Undef
-    // Content for cached obj
+    // Content for cached object
+    public use_cache: boolean = false
     public input_hash = null
     public input: any = null
-    public eval_func: (input: any) => any = null
+    public eval_func: (input: any) => Promise<cnt> = null
+
+    // Revisable
+    public can_revise: boolean = false
+
     public dependency: obj_host[] = []
-    private _content: any = null
+
+    private _content: cnt = null
 
     public constructor() {
     }
 
-    public get_content(state: exec_state): any {
+    public async get_content(state: exec_state): Promise<cnt> {
         if (this._content == null) {
             if (this.use_cache) {
-                let res = eval_and_cache(this, state.cache_table)
+                let res = await eval_and_cache(this, state.cache_table)
                 if (res == null) {
                     this._content = null
                 }
@@ -203,43 +232,42 @@ export class obj_host {
             return this._content
     }
 
-    public get_text(state: exec_state): string {
-        let content = this.get_content(state)
-        switch (this.data_type) {
+    public async get_text(state: exec_state): Promise<string> {
+        let cnt = await this.get_content(state)
+        if(typeof cnt === 'string')
+            return cnt
+        switch (cnt.type) {
             case "str": {
-                return content
+                return cnt.content
             }
             default:
-            case "obj": {
-                return JSON.stringify(content)
-            }
+                throw Error("Not finished yet")
         }
     }
 
-    public set_content(content: any) {
+    public set_content(content: cnt) {
         if (content != null)
             this.defined = true
         this._content = content
     }
 }
 
-export function eval_without_cache(host: obj_host): any {
-    let res = host.eval_func(host.input)
-    return res
+export async function eval_without_cache(host: obj_host): Promise<cnt> {
+    return await host.eval_func(host.input)
 }
 
 
-export function eval_and_cache(host: obj_host, cache_table: any): any {
+export async function eval_and_cache(host: obj_host, cache_table: any): Promise<cnt> {
     let cached = cache_table[host.input_hash]
     if (cached != undefined)
         return cached
-    let res = host.eval_func(host.input)
+    let res = await host.eval_func(host.input)
     cache_table[host.input_hash] = res
     host.set_content(res)
     return res
 }
 
-export function eval_to_text(nodes: parse_node[], state: exec_state): [string, obj_host[]] {
+export async function eval_to_text(nodes: parse_node[], state: exec_state): Promise<{text: string, dependency: obj_host[]}>{
     let dependency: obj_host[] = []
     let undef = []
     for (let node of nodes) {
@@ -251,7 +279,7 @@ export function eval_to_text(nodes: parse_node[], state: exec_state): [string, o
                     undef.push(node.content)
                     continue
                 }
-                if(var_host.get_content(state) == null){
+                if (await var_host.get_content(state) == null) {
                     undef.push(node.content)
                     continue
                 }
@@ -268,7 +296,7 @@ export function eval_to_text(nodes: parse_node[], state: exec_state): [string, o
         if (node.type == "var_use") {
             let var_host = dependency[i_var]
             if (var_host != null) {
-                let content = var_host.get_content(state)
+                let content = await var_host.get_content(state)
                 res.push(content + " ")
             } else
                 res.push("*Error*")
@@ -284,10 +312,17 @@ export function eval_to_text(nodes: parse_node[], state: exec_state): [string, o
         for (let name of undef) {
             state.add_warning("Variable \"" + name + "\" is not defined")
         }
-        return [null, dependency]
+        return {
+            text: null,
+            dependency
+        }
     }
 
-    let content = normalize_text(res.join(""))
 
-    return [content, dependency]
+    let text = normalize_text(res.join(""))
+
+    return {
+        text,
+        dependency
+    }
 }

@@ -6,7 +6,7 @@ import {make_set_node} from "./set";
 import {exec_var_op} from "./var_op";
 
 
-function exec(cmd_node: parse_node, state: exec_state, assigned: obj_host) {
+async function exec(cmd_node: parse_node, state: exec_state, assigned: obj_host) {
     if (assigned != null) {
         state.add_fatal("There should not be an assigned variable")
         return
@@ -21,7 +21,7 @@ function exec(cmd_node: parse_node, state: exec_state, assigned: obj_host) {
         return
     }
 
-    let retake_res = eval_without_cache(var_to_op)
+    let retake_res = await eval_without_cache(var_to_op)
     let set_cmd_node = cmd_node.add_older_sibling(new parse_node("cmd"), true).set_content("set")
     make_set_node(set_cmd_node, var_to_op.var_name, var_to_op.input_hash, retake_res)
     var_to_op.set_content(retake_res)

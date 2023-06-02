@@ -8,14 +8,14 @@ import {simple_literal_parser} from "../../parse/common";
 import {get_first_body_node, store_literal_to_host} from "../utils";
 
 
-function exec(cmd_node: parse_node, state: exec_state, assigned: obj_host) {
+async function exec(cmd_node: parse_node, state: exec_state, assigned: obj_host) {
     if (assigned == null)
         return
     let cmd_body = get_first_body_node(cmd_node)
-    store_literal_to_host(cmd_body, state, assigned)
+    await store_literal_to_host(cmd_body, state, assigned)
     if (!assigned.defined)
         return
-    let content = assigned.get_content(state).trim()
+    let content = (await assigned.get_text(state)).trim()
     // TODO
 
 }
