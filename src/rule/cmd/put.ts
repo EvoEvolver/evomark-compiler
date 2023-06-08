@@ -9,8 +9,8 @@ async function exec(cmd_node: parse_node, state: exec_state, assigned: obj_host,
     let cmd_body = get_first_body_node(cmd_node)
     let {text: res} = await eval_to_text(cmd_body.children, state)
     //let [node, parse_state] = core.parser.parse(res, {})
-    let p_state = new parse_state(res, proc_state.config)
-    let [node, new_p_state] = core.parser.parse(res, p_state)
+    let p_state = new parse_state(res)
+    let [node, new_p_state] = core.parser.parse(res)
     node.type = "fragment"
     cmd_node.add_sibling(node).make_dynamic()
     return

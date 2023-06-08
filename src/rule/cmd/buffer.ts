@@ -30,7 +30,7 @@ async function exec(cmd_node: parse_node, state: exec_state, assigned: obj_host)
 
 
     let new_hash = get_hash(var_to_op.get_text(state), "buffer")
-    let newly_buffered_content = var_to_op.get_content(state)
+    let newly_buffered_content = await var_to_op.get_content(state)
     state.save_cache(new_hash, newly_buffered_content)
     buffered_cache_node.set_content_obj(new_hash)
 

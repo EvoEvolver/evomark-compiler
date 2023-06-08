@@ -46,7 +46,7 @@ export class evomark_core {
         if (!config) {
             config = {}
         }
-        let [root, parse_state] = this.parser.parse(src, config)
+        let [root, parse_state] = this.parser.parse(src)
         let proc_state = get_proc_state_from_parse(parse_state, root)
         await this.exec(file_path, root, proc_state)
         let [tokens, tokener_state] = this.tokenizer.tokenize(root, parse_state)
@@ -82,12 +82,11 @@ export class evomark_core {
         render_res.push(this.tokenizer.get_component_imports(tokener_state))
         render_res.push("</script>\n")
         render_res.push("<script>\n")
-        render_res.push(`export const documentProps = {title: '${tokener_state.config?.title || "Evomark project"}'}\n`)
+        render_res.push(`export const documentProps = {title: "Evomark project"}\n`)
         render_res.push("</script>\n")
-        let config = tokener_state.config
 
         let page_env = {
-            title: config?.title
+            title: "Evomark project"
         }
 
         return [render_res.join(""), page_env]
@@ -95,16 +94,12 @@ export class evomark_core {
 }
 
 export type proc_state = {
-    config: any,
-    ref_map: any,
     root: parse_node,
     tokens?: token[],
     rendered?: string
 }
 export function get_proc_state_from_parse(parse_state: parse_state, root: parse_node): proc_state{
     return {
-        config: parse_state.config,
-        ref_map: parse_state.ref_table,
         root: root
     }
 }

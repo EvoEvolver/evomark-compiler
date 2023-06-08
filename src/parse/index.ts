@@ -17,10 +17,6 @@ export class evomark_parser {
         this.add_func_rule("box", simple_parser)
     }
 
-    public init_state_config = () => {
-        return {}
-    }
-
     public add_func_rule(name: string, rule: func_parser) {
         if (name in this.func_rules)
             throw Error("Trying to add a rule of the same name: " + name)
@@ -37,9 +33,8 @@ export class evomark_parser {
         return parse_core_with_rules(src, state, default_core_rules, this)
     }
 
-    public parse(src: string, config: any): [parse_node, parse_state] {
-        let state = new parse_state(src, config)
-        state.config = this.init_state_config()
+    public parse(src: string): [parse_node, parse_state] {
+        let state = new parse_state(src)
         this.parse_core(src, state)
         return [state.root_node, state]
     }
@@ -86,29 +81,17 @@ export function parse_identifier(src: string, state: parse_state): string {
 }
 
 export class parse_state {
-    // Configs used for parse and tokenize.
-    public config = {}
-    public ref_table: Record<string, parse_node> = {}
     public pos = 0
     public start = 0
     public end = -1
     public curr_node: parse_node
     public root_node: parse_node
 
-    public constructor(src: string, config: any) {
+    public constructor(src: string) {
         this.end = src.length
         // Load the global config
-        Object.assign(this.config, config)
         this.curr_node = new parse_node("root")
         this.root_node = this.curr_node
-    }
-
-    public assign_to_config(config: any, namespace: string) {
-        if (namespace === null) {
-            Object.assign(this.config, config)
-        } else {
-            Object.assign(this.config[namespace], config)
-        }
     }
 
     public push_node(type: string): parse_node {

@@ -19,7 +19,7 @@ export function parse_ref_assign(src: string, state: parse_state, parser: evomar
     let start = state.pos
     let i = state.pos
     let equal_pos = find_next_char(src, "=", " ", start, state.end)
-    let leagle_def = false
+    let legal_def = false
     if (equal_pos > 0) {
         i = equal_pos + 1
         let func_pos = find_next_char(src, "#", " \n", i, state.end)
@@ -32,17 +32,22 @@ export function parse_ref_assign(src: string, state: parse_state, parser: evomar
             ref_node.delim = [start, state.pos]
             if (succ) {
                 // Add the ref to the ref_table
+                // We stop use ref_table
+                // We need to postpone the reference resolution to the browser
+                // TODO
+                /*
                 if (ref_name in state.ref_table) {
                     state.push_warning_node("Redefining " + ref_name + "!")
                 } else {
                     state.ref_table[ref_name] = ref_node
                 }
-                leagle_def = true
+                */
+                legal_def = true
             }
             state.curr_node = ref_node.parent
         }
     }
-    if (!leagle_def) {
+    if (!legal_def) {
         state.push_warning_node_to_root("\"@" + ref_name + " = \" must be followed with a function")
     }
     return true

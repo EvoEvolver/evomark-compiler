@@ -147,15 +147,12 @@ export class evomark_tokenizer {
 }
 
 export class tokener_state {
-    public config: any = null
     public ref_table: Record<string, parse_node>
     public used_func: any = {}
     public env: Record<string, any> = {}
     public available_index = {}
 
     public constructor(parse_state: parse_state) {
-        this.ref_table = parse_state.ref_table
-        this.config = parse_state.config
     }
 
     public get_available_index(display_name: string): number {
