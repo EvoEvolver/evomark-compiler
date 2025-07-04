@@ -57,11 +57,11 @@ async function exec(cmd_node: parse_node, state: exec_state, assigned: obj_host)
     if (cmd_node.children.length == 0)
         set_empty(cmd_node, state)
 
+
     if (cmd_node.children[0]?.type != "body") {
         state.add_warning("The first child must be a body with a var inside")
         return
     }
-
     let var_use_node = cmd_node.children[0].children[0]
     if (var_use_node.type != "var_use") {
         state.add_warning("The first child must be a body with a var inside")

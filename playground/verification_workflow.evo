@@ -1,0 +1,16 @@
+
+%f = $def{1+1=2}
+
+%a = $lm{Q: Why %f ? A:}
+
+%verification = $lm{
+    Here is an explanation to why %f :
+    %a
+    Do you think it is correct?
+    Answer:
+}
+
+$show{%verification}{
+     Yes, it is correct.
+}
+

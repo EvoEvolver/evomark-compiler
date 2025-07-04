@@ -1,0 +1,60 @@
+
+%topic = $def{crab in a bucket}
+
+%prompt_ctx = $d{
+    You are writing a introduction to %topic .
+}
+
+%what = $lm{
+    %prompt_ctx
+
+    What is %topic ?
+    
+    
+    Answer:
+}
+
+$set{%what}('eddf1f0b0e55bdc3fd3f51f74b8b7d10'){
+     Crab in a bucket is a phrase often used to describe a situation in which individual members of a group focus on preventing others from progressing or achieving their goals, instead of supporting each other's progress. It is an analogy for the idea that people are pulling each other down rather than helping each other reach their full potential. The phrase has been used in a variety of contexts, from workplace environments to educational institutions, to describe a mindset that can hinder progress and collaboration.
+}
+
+
+
+$show{%what}{
+     Crab in a bucket is a phrase often used to describe a situation in which individual members of a group focus on preventing others from progressing or achieving their goals, instead of supporting each other's progress. It is an analogy for the idea that people are pulling each other down rather than helping each other reach their full potential. The phrase has been used in a variety of contexts, from workplace environments to educational institutions, to describe a mindset that can hinder progress and collaboration.
+}
+
+#sec{What is %topic ?}
+
+%what
+
+%what = $lm{
+    Summarize the following paragraph in 30 words or less.
+    %what
+    Answer:
+}
+
+%why = $lm{
+    %prompt_ctx
+
+    You defined %topic as below:
+
+    %what
+
+    Why is %topic important?
+    
+    
+    Answer:
+}
+
+$show{%what}{
+     The phrase "crab in a bucket" is used to describe a situation where one's peers or colleagues do not support each other in achieving goals, instead preventing each other from progressing. It is commonly seen in workplaces or educational institutions and can halt collaboration and inhibit progress.
+}
+
+$show{%why}{
+     Crab in a bucket is an important concept to be aware of, as it can have a significant impact on any environment. It is essential to understand the implications of this behaviour in order to create an environment that promotes collaboration and progress, instead of one that makes individual goals more difficult to attain. We must recognize that crabs in a bucket exist and work together to prevent the perpetuation of this negative cycle.
+}
+
+#sec{Why is %topic important?}
+
+%why

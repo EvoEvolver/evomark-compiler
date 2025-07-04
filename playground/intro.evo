@@ -1,0 +1,23 @@
+
+%q = $def{Who discovered America?}
+
+%a = $lm{
+    Q: %q
+    A:
+}
+
+$set{%a}('da17bf62f24bc849c8f14e99639961a1'){
+    The commonly held belief is that Christopher Columbus discovered America in 1492.
+    However, this idea has been challenged in recent years as evidence has shown that
+    indigenous peoples were already living in the Americas for thousands of years before
+    Columbus arrived. Additionally, there is evidence that suggests other explorers,
+    such as the Norse explorer Leif Erikson, may have reached the Americas before Columbus.
+    Therefore, it is more accurate to say that America was not "discovered,"
+    but rather already inhabited.
+}
+
+
+#sec{%q}
+
+%a
+

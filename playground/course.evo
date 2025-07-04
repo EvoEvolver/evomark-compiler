@@ -25,13 +25,33 @@
     }{Now, let's discuss}
 
     $set{%s}('e7930dd5951462ff406fa574ce44e38f'){
-        Now, let's discuss each of these characteristics of an ideal compiler in a bit more detail. 
+        Now, let's talk each of these characteristics of an ideal compiler in a bit more detail.
         
-        Starting with the User Interface, it's important that the compiler have a user-friendly layout. The user should be able to quickly find the options they need, enabling them to compile code quickly and accurately. The output of the compiler should be precise and the user should be given clear diagnostic messages when errors are encountered.
+        
+        Beginning with the User Interface, it's important that the compiler have a user-friendly layout. The user should be able to quickly find the options they need, enabling them to compile code quickly and accurately. The output of the compiler should be precise and the user should be given clear diagnostic messages when errors are encountered.
+        
         
         Moving on, a good compiler should be able to correctly implement the entire language. All language-defined features should be supported and the compiler should detect all statically detectable errors. This ensures that the source code is being read, parsed and compiled accurately with no discrepancies.
         
+        
         The compiler should also generate highly optimized code. This will help to improve the run-time performance of the application, allowing you to save on memory and processor cycles. Additionally, the compiler should compile quickly using modest system resources, so that code can be compiled quickly and efficiently.
+        
+        
+        Finally, an ideal compiler should follow good software engineering practices. This includes being well modularized, documented, and thoroughly tested. These all help to ensure that the compiler is reliable and can produce accurate results with each compilation.    
+    }
+
+    $show{%s}{
+        Now, let's talk each of these characteristics of an ideal compiler in a bit more detail.
+        
+        
+        Beginning with the User Interface, it's important that the compiler have a user-friendly layout. The user should be able to quickly find the options they need, enabling them to compile code quickly and accurately. The output of the compiler should be precise and the user should be given clear diagnostic messages when errors are encountered.
+        
+        
+        Moving on, a good compiler should be able to correctly implement the entire language. All language-defined features should be supported and the compiler should detect all statically detectable errors. This ensures that the source code is being read, parsed and compiled accurately with no discrepancies.
+        
+        
+        The compiler should also generate highly optimized code. This will help to improve the run-time performance of the application, allowing you to save on memory and processor cycles. Additionally, the compiler should compile quickly using modest system resources, so that code can be compiled quickly and efficiently.
+        
         
         Finally, an ideal compiler should follow good software engineering practices. This includes being well modularized, documented, and thoroughly tested. These all help to ensure that the compiler is reliable and can produce accurate results with each compilation.    
     }

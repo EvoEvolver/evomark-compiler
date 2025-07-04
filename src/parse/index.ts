@@ -142,7 +142,6 @@ export class parse_state {
 export class parse_node {
     public children: parse_node[] = []
     public parent: parse_node
-    public namespace: string = ""
     public typesetting_type = ""
     public delim: number[] = [-1, -1]
     public type: string

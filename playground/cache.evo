@@ -1,0 +1,18 @@
+
+%a = $lm{Q: Why 1+1=2 ? A:}
+%b = $lm{Q: Why 1+1=2 ? A:}
+%f = $def{1+1=2}
+%c = $lm{Q: Why %f ? A:}
+
+$show{%a}{
+     One plus one equals two because it is an accepted mathematical fact that two things added together equal two. This can be seen when using basic addition with any numbers, as two things added together will always equal two.
+}
+
+$show{%b}{
+     One plus one equals two because it is an accepted mathematical fact that two things added together equal two. This can be seen when using basic addition with any numbers, as two things added together will always equal two.
+}
+
+$show{%c}{
+     One plus one equals two because it is an accepted mathematical fact that two things added together equal two. This can be seen when using basic addition with any numbers, as two things added together will always equal two.
+}
+

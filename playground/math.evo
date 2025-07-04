@@ -1,0 +1,21 @@
+
+
+%topic = $d{Newton's second law}
+
+%what = $lm{What is %topic ? Answer:}
+
+$show{%what}{
+     Newton's second law of motion states that the acceleration of an object is directly proportional to the net force applied, and inversely proportional to the mass of the object. In equation form, this can be stated as F=ma, where F is the net force applied, m is the mass of the object, and a is the acceleration of the object.
+}
+
+%formula = $lm{What is the formula for %topic ? Describe it in the format of LaTeX. Answer in one line:}
+
+$set{%formula}('57a92e426f609813ea0755e614204248'){F=m \cdot a}
+
+$show{%formula}{
+    F=m \cdot a
+}
+
+#equ{1+1=2}
+
+#equ{%formula}
